@@ -1,0 +1,54 @@
+﻿function VerNota(grupo, cliente, NotaId, Pagina, ticketWS) {
+
+    if (grupo != "CLE") {
+        
+        document.getElementById('ContentPlaceHolder1_hf_notaId').value = NotaId;
+        document.getElementById('ContentPlaceHolder1_hf_pagina').value = Pagina;
+
+        url = "../WebServices/UsuariosWS.asmx/estaAutorizadoACargarPedidos";
+        var btn_verNota = document.getElementById("ContentPlaceHolder1_btn_verNota");
+        
+        //Verifica si el cliente esta autorizado para que le carguen pedidos
+        if (btn_verNota) {
+            $.ajax({
+                type: 'POST',
+                dataType: "json",
+                url: url,
+                cache: true,
+                headers: {
+                    "Accept": "*/*",
+                    "Content-Type": "application/json; charset=utf-8",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "TicketWS": ticketWS
+                },
+                data: "{'cliente':'" + cliente + "'}"
+
+            }).done(function (data) {
+
+                if (data)
+                    result = data.d;
+				console.log("termino");
+
+                if (result == "0") {
+                    bootbox.alert("La emprendedora " + cliente + " no tiene su email validado o no entregó su legajo. No puede cargar pedidos", function () { });
+                }
+                else {
+                    btn_verNota.click();
+                }
+            }).fail(function () {
+                bootbox.alert("Error al verificar al usuario", function () { });
+
+            });
+
+        }
+    }
+    else {
+        document.getElementById('ContentPlaceHolder1_hf_notaId').value = NotaId;
+        document.getElementById('ContentPlaceHolder1_hf_pagina').value = Pagina;
+        var btn_verNota = document.getElementById("ContentPlaceHolder1_btn_verNota");
+
+        btn_verNota.click();
+    }
+}
+
+

@@ -1,0 +1,1761 @@
+
+	/////////////////////////////////////////////////////////////////////
+	//ESSENCARRITOWIZARD
+	//Define el objeto para el wizard del carrito
+	/////////////////////////////////////////////////////////////////////
+    EssenCarritoWizard = function (opciones) {
+		
+		var pasos = [];
+		var tabActualIndex = 0;
+		var cantidadPasos = 0;
+		var botonAnterior = "";
+		var botonSiguiente = "";
+		var controlTituloId = "";
+		
+		//Objeto para los pasos del wizard
+		WizardPaso = function () {
+			
+			var titulo;
+			var tabId;			
+		}
+				
+		//Opciones por default
+		var defaults = {			
+			pasos: []					//Lista de pasos
+		};
+		
+		//Opciones generales
+		var opts = $.extend({}, defaults, opciones);		
+		
+		//Cantidad de pasos
+		cantidadPasos = opts.pasos.length;
+		
+		//Muestra el primer tab
+		mostrar(0);
+		
+		//Devuelve el index actual
+		this.obtenerIndexActual = obtenerIndexActual;
+		function obtenerIndexActual()
+		{
+			return tabActualIndex
+		}		
+		
+		//Muestra un paso en particular
+		this.mostrar = mostrar;
+		function mostrar(indice)
+		{
+			if (indice > cantidadPasos)
+				return;
+			
+			$("#" + opts.pasos[tabActualIndex].tabId).removeClass('active');
+			tabActualIndex = indice;
+			$("#" + opts.pasos[tabActualIndex].tabId).addClass('active');
+			cambiarTitulo(opts.pasos[tabActualIndex].titulo);
+			
+			if (indice == 0)
+			{
+				//deshabilitarBoton(opts.botonAnterior);
+				habilitarBoton(opts.botonSiguiente);				
+			}
+			
+			if (indice == cantidadPasos - 1)
+			{
+				deshabilitarBoton(opts.botonSiguiente);
+				habilitarBoton(opts.botonAnterior);					
+			}
+		}
+		
+		//Avanza un paso
+		this.avanzar = avanzar;
+		function avanzar()
+		{
+			//Debe existir al menos un articulo para poder avanzar
+			if (tabActualIndex == 0)
+			{	
+				if (carrito.obtenerCantidadItems() < 1)
+				{
+					bootbox.alert("Al menos debes agregar un art&iacute;culo al carrito!");
+					return false;
+				}
+			
+				//Plan canje solo muestra si hay algo para declarar			
+				if (carrito.tieneParaCanjear() == false)
+				{
+					mostrar(1);
+				}
+			}			
+			
+			//Antes de entrar en la confirmacion, actualiza valores de plan canje
+			if (tabActualIndex == 2)
+			{
+				actualizarDatosConfirmacion();
+			}
+				
+			//Pagar solo eligiendo metodo de pago
+			if (tabActualIndex == 3)
+			{
+				bootbox.alert("Por favor elija un medio de pago");
+				return false;				   
+			}
+			
+			//Habilita boton anterior
+			habilitarBoton(opts.botonAnterior);
+			
+			//Llegó al ultimo paso, no puede avanzar mas
+			if (tabActualIndex < cantidadPasos -1)
+			{
+				$("#" + opts.pasos[tabActualIndex].tabId).removeClass('active');				
+				tabActualIndex ++;
+				$("#" + opts.pasos[tabActualIndex].tabId).addClass('active');
+				cambiarTitulo(opts.pasos[tabActualIndex].titulo);								
+			}
+			else
+			{
+				return;
+			}
+			
+			//Habilita el boton siguiente?
+			if (tabActualIndex == cantidadPasos -1)
+				deshabilitarBoton(opts.botonSiguiente);
+			else
+				habilitarBoton(opts.botonSiguiente);
+				
+		}
+		
+		//Retrocede un paso
+		this.retroceder = retroceder;
+		function retroceder()
+		{
+			//Se solicitó que al estar en el paso 1, se pueda ir a la carga de articulos
+			//lamentablemente se debe harcodear la funcion ya que no es parte 
+			if(tabActualIndex == 0)
+				config_Carrito();
+			
+			//Habilita el boton anterior?
+			/*if (tabActualIndex == 1)				
+				deshabilitarBoton(opts.botonAnterior);*/
+			
+			//Plan canje solo muestra si hay algo para declarar			
+			if (tabActualIndex == 2)
+			{
+				if (carrito.tieneParaCanjear() == false)
+				{
+					mostrar(0);
+				}
+			}
+			
+			if (tabActualIndex != 1)	
+				habilitarBoton(opts.botonSiguiente);
+		
+			//Legó al primer paso, no puede avanzar mas
+			if (tabActualIndex > 0)
+			{
+				$("#" + opts.pasos[tabActualIndex].tabId).removeClass('active');				
+				tabActualIndex --;
+				$("#" + opts.pasos[tabActualIndex].tabId).addClass('active');				
+				cambiarTitulo(opts.pasos[tabActualIndex].titulo);
+			}			
+		}
+		
+		//Cambia un titulo
+		function cambiarTitulo(nuevoTitulo)
+		{
+			$("#" + opts.controlTituloId).html("<b>" + nuevoTitulo + "</b>");
+		}
+		
+		//Habilita un boton
+		function habilitarBoton(boton)
+		{
+			$("#" + boton).removeAttr("disabled");
+			$("#" + boton).css("color","#ff7900");
+			$("#" + boton).css("border-color","#ff7900");
+		}
+		
+		//Deshabilita un boton
+		function deshabilitarBoton(boton)
+		{
+			$("#" + boton).attr("disabled","disabled");
+			$("#" + boton).css("color","#c0c0c0");
+			$("#" + boton).css("border-color","#c0c0c0");
+		}
+		
+	};
+	
+	/////////////////////////////////////////////////////////////////////
+	//ESSENCARRITO
+	//Define el objeto carrito
+	/////////////////////////////////////////////////////////////////////
+	EssenCarrito = function (opciones) {
+		
+		//Opciones por default
+		var defaults = {			
+			limiteCredito: 0,					//Limite de credito disponible
+			valoriza: true,						//Flag que indica si se debe valorizar el pedido
+			aceptaMediosDePago: false			//Flag que indica si la nota de pedido acepta pago con tarjeta de credito			
+		};
+		
+		//Opciones generales
+		var opts = $.extend({}, defaults, opciones);
+		
+		//Lista de productos
+		var productos = [];
+		
+		//Para devolver mensajes ante errores
+		var mensaje = "";
+		
+		//Guarda el valor del costo del carrito
+		var totalCarrito = 0;	
+		
+		//Guarda el valor de puntos del carrito
+		var totalCarritoPuntos = 0;	
+		
+		//Guarda el valor del psvp del carrito
+		var totalCarritoPsvp = 0;	
+		
+		//Objeto para totales
+		EssenCarritoTotales = function () {
+			
+			var totalPsvp;
+			var totalPuntos;
+			var totalCosto;
+			var totalGanancia;			
+			var totalPlanCanje;			
+		}
+		
+		//Devuelve un json con los productos cargados al momento		
+		this.obtenerProductosCargados = obtenerProductosCargados;
+		function obtenerProductosCargados()
+		{	
+			var lista = [];
+			var encontrados = [];
+			var registro = {};
+			var i = 0;
+			
+			//Articulos seleccionados
+			var seleccionados = JSON.parse(productos2JSON())		
+						
+			//Busca los datos para cada articulos
+			$.each(seleccionados, function (i, item) {				
+			
+				if (item.esCombo == true)
+				{
+					//Busca los articulos que pertenecen al combo
+					encontrados = dataProductos.filter(x => x.ComboAlQuePertenece === item.codigoArticulo);
+					
+					if (encontrados.length < 1)
+					{
+						bootbox.alert("Error: no se pueden encontrar articulos para el combo!");
+						return false;
+					}
+					else
+					{
+						for (f=0; f < encontrados.length; f++)
+						{
+							registro = {};
+							registro["ArticuloId"] = encontrados[f].ArticuloId;
+							registro["InstanciaId"] = encontrados[f].InstanciaId;
+							registro["Cantidad"] = item.cantidad;
+							registro["comboAlQuePertenece"] = item.codigoArticulo;
+							
+							lista.push(registro);
+						}
+					}
+				}
+				else
+				{
+					//Busca el articulo por codigo. No tiene que pertenecer a un combo					
+					i = dataProductos.findIndex(x => x.Codigo === item.codigoArticulo && x.ComboAlQuePertenece === "");
+					if (i < 0)
+					{
+						bootbox.alert("Error: no se pueden encontrar el articulo!");
+						return false;
+					}
+					else
+					{
+						registro = {};
+						registro["ArticuloId"] = dataProductos[i].ArticuloId;
+						registro["InstanciaId"] = dataProductos[i].InstanciaId;
+						registro["Cantidad"] = item.cantidad;
+						registro["comboAlQuePertenece"] = "";
+						
+						lista.push(registro);
+					}
+				}
+			});
+			
+			return JSON.stringify(lista);			
+		
+		}//fin obtenerProductosCargados
+		
+		//Busca un producto por codigo
+		//Si lo encuentra devuelve el indice si no, devuelve -1
+		this.buscarItemXCodigo = buscarItemXCodigo;
+		function buscarItemXCodigo(codigoABuscar)
+		{		
+			for (f=0; f < productos.length; f++)
+			{	
+				if (productos[f].codigoArticulo == codigoABuscar)
+				{					
+					return f;
+				}
+			}
+			
+			return -1;
+		
+		}//fin buscarItemXCodigo
+		
+		//Devuelve la cantidad de items en el carrito
+		this.obtenerCantidadItems = obtenerCantidadItems;
+		function obtenerCantidadItems()
+		{
+			return productos.length;
+			
+		}//fin obtenerCantidadItems
+		
+		//Devuelve los datos de un producto en particular. Recibe el numero de elemento
+		this.obtenerProducto = obtenerProducto;
+		function obtenerProducto(i)
+		{
+			if (i > productos.length)
+				return null;
+			
+			var articulo = new Object();
+		
+			articulo.codigoArticulo = productos[i].codigoArticulo;
+			articulo.descripcion = productos[i].descripcion;
+			articulo.esCombo = productos[i].esCombo;
+			articulo.cantidad = productos[i].cantidad;
+			articulo.psvp = productos[i].psvp;
+			articulo.puntos = productos[i].puntos;
+			articulo.costo = productos[i].costo;
+			articulo.ganancia = productos[i].ganancia;		
+			articulo.planCanje = productos[i].planCanje;
+			
+			return articulo;
+			
+		}//fin obtenerProducto
+		
+		//Devuelve true si tiene articulos con plan canje
+		this.tieneParaCanjear = tieneParaCanjear;
+		function tieneParaCanjear()
+		{
+			for (f=0; f < productos.length; f++)
+			{	
+				if(productos[f].planCanje >= 1)
+					return true;				
+			}
+			
+			return false;
+		}
+		
+		//Devuelve los totales del carrito
+		this.obtenerTotales = obtenerTotales;
+		function obtenerTotales()
+		{
+			var totales = new EssenCarritoTotales();
+			totales.totalPsvp = 0;
+			totales.totalPuntos = 0;
+			totales.totalCosto = 0;
+			totales.totalGanancia = 0;
+			totales.totalCantidad = 0;
+			totales.totalPlanCanje = 0;
+			
+			for (f=0; f < productos.length; f++)
+			{	
+				totales.totalPsvp += productos[f].psvp * productos[f].cantidad;
+				totales.totalPuntos += productos[f].puntos * productos[f].cantidad;
+				totales.totalCosto += productos[f].costo * productos[f].cantidad;
+				totales.totalGanancia += productos[f].ganancia * productos[f].cantidad;
+				totales.totalCantidad += productos[f].cantidad;		
+				
+				totales.totalPlanCanje += productos[f].cantidad * productos[f].planCanje;				
+			}
+			
+			//Actualiza el total del Carrito
+			totalCarrito = totales.totalCosto;
+			
+			//Actualiza el total del Carrito Psvp
+			totalCarritoPsvp = totales.totalPsvp;
+			
+			//Actualiza el total del Carrito en puntos
+			totalCarritoPuntos = totales.totalPuntos;
+			
+			return totales;
+			
+		}//fin obtenerTotales
+		
+		//Devuelve la cantidad total para un articulo
+		this.obtenerCantidad = obtenerCantidad;
+		function obtenerCantidad(codigoArticulo)
+		{
+			var total = 0;
+			
+			for (f=0; f < productos.length; f++)
+			{			
+				if (productos[f].codigoArticulo == codigoArticulo)
+					total += productos[f].cantidad;				
+			}
+			
+			return total;
+			
+		}//fin obtenerCantidad
+		
+		//Devuelve el costo total para un articulo
+		this.obtenerCosto = obtenerCosto;
+		function obtenerCosto(codigoArticulo)
+		{
+			var total = 0;
+			
+			for (f=0; f < productos.length; f++)
+			{			
+				if (productos[f].codigoArticulo == codigoArticulo)
+					total += productos[f].costo * productos[f].cantidad;				
+			}
+			
+			return total;
+			
+		}//fin obtenerCosto		
+		
+		//Devuelve el total del carrito
+		this.obtenerTotalCosto = obtenerTotalCosto;
+		function obtenerTotalCosto()
+		{			
+			return totalCarrito;
+		}
+		
+		//Devuelve el total psvp del carrito
+		this.obtenerTotalPsvp = obtenerTotalPsvp;
+		function obtenerTotalPsvp()
+		{			
+			return totalCarritoPsvp;
+		}
+		
+		//Devuelve el total de puntos del carrito
+		this.obtenerTotalPuntos = obtenerTotalPuntos;
+		function obtenerTotalPuntos()
+		{			
+			return totalCarritoPuntos;
+		}
+		
+		//Agrega un produto al carrito
+		//Recibe codigo de articulo, flag indicando si es combo (true o false), cantidad, psvp, puntos, costo, ganancia
+		//Devuelve true si fue satisfactorio o false si hubo error
+		this.agregarProducto = agregarProducto;
+		function agregarProducto(codigoArticulo, descripcion, esCombo, cantidad, psvp, puntos, costo, ganancia, planCanje) {
+		
+			this.mensaje = '';
+		
+			if (codigoArticulo == "" || descripcion == "" || cantidad == "" /*|| costo == ""*/ || ganancia =="")
+			{						
+				this.mensaje = 'El Art&iacute;culo no tiene todos los datos necesarios';
+				return false;
+			}						
+			
+			//total de la linea
+			var totalCostoLinea = costo * cantidad;		
+			
+			//Verifica contra Limite de Credito?
+			//Primero verifica si la nota valoriza
+			if (opts.valoriza == "1")
+			{	
+				//Verifica si va a superar su limite de credito
+				if (opts.limiteCredito < (totalCarrito + totalCostoLinea))
+				{
+					//Si no acepta otros medios de pago, no deja seguir agregando
+					if (opts.aceptaMediosDePago == "0")
+					{
+						this.mensaje = "&iexcl;Ha superado su l&iacute;mite de credito&excl;";
+						return false;
+					}
+				}
+			}
+
+			//Busca si ya existe el articulo en el carrito
+			var itemNro = this.buscarItemXCodigo(codigoArticulo);
+						
+			//arma el item a agregar
+			var item = '{"codigoArticulo":"' + codigoArticulo + '","descripcion":"' + descripcion + '","esCombo":' + esCombo + ',"cantidad":' + cantidad + ',"psvp":' + psvp + ',"puntos":' + puntos + ',"costo":' + costo + ',"ganancia":' + ganancia + ',"planCanje":' + planCanje + '}';
+			
+			//Si no existe el producto en el carrito, lo agrega, si no suma la cantidad
+			if (itemNro == -1)
+				productos.push(JSON.parse(item));		
+			else
+				productos[itemNro].cantidad += parseInt(cantidad);
+			
+			//Actualiza el total del costo del carrito
+			totalCarrito += totalCostoLinea;		
+			
+			$('#ContentPlaceHolder1_hf_productos').val(productos2JSON());
+			
+			return true;
+		
+		}//fin agregarProducto
+		
+		//Quita un producto del carrito
+		//Recibe el codigo de producto a quitar completamente
+		//Devuelve true si fue satisfactorio o false si hubo error
+		this.quitarProducto = quitarProducto;
+		function quitarProducto(codigoArticulo) {
+		
+			mensaje = '';
+		
+			if (codigoArticulo == "")
+			{
+				mensaje = 'El Art&iacute;culo no tiene todos los datos necesarios';
+				return false;
+			}
+
+			//Busca si ya existe el articulo en el carrito
+			var itemNro = this.buscarItemXCodigo(codigoArticulo);									
+			var totalLinea = obtenerCosto(codigoArticulo);
+			
+			//Si no existe el producto, da error, si no lo quita
+			if (itemNro == -1)
+			{
+				mensaje = 'No se encontr&oactue; el art&iacute;culo en el carrito';
+				return false;
+			}
+			else
+			{
+				productos.splice(itemNro, 1);				
+				totalCarrito -= totalLinea;
+			}
+			
+			return true;
+			
+		}//fin quitarProducto
+		
+		//Convierte los productos en un string JSON
+		this.productos2JSON = productos2JSON;
+		function productos2JSON(control)
+		{			
+			return JSON.stringify(productos);
+		
+		}//fin productos2JSON
+	};
+	/////////////////////////////////////////////////////////////////////
+	/// FIN ESSEN CARRITO
+	/////////////////////////////////////////////////////////////////////
+	
+	//ON LOAD
+    $(window).on('load', function() {
+		
+		$('#div_faltantes').on('show.bs.modal', function () {			
+			$('#div_faltantes .modal-content').attr('style', 'height: ' + $(window).height() * 0.6 + "px !important");			
+			$('#div_faltantes .modal-body').attr('style', 'height: ' + $(window).height() * 0.5 + "px !important");
+		});
+		
+		$('#div_direccionesFavoritas').on('show.bs.modal', function () {
+			$('#div_direccionesFavoritas .modal-content').attr('style', 'height: ' + $(window).height() * 0.7 + "px !important");			
+			$('#div_direccionesFavoritas .modal-body').attr('style', 'height: ' + $(window).height() * 0.6 + "px !important");
+			$('#div_direccionesFavoritasBody').attr('style', 'height: ' + $(window).height() * 0.5 + "px !important; overflow-y:auto; overflow-x:hidden");
+		});
+		
+		$('#div_direccionesNuevas').on('show.bs.modal', function () {            
+		
+			$('#div_direccionesNuevas .modal-content').attr('style', 'height: ' + $(window).height() * 0.9 + "px !important");			
+			$('#div_direccionesNuevas .modal-body').attr('style', 'height: ' + $(window).height() * 0.8 + "px !important");			
+			$('#div_direccionesNuevasBody').attr('style', 'height: ' + $(window).height() * 0.8 + "px !important; overflow-y:auto; overflow-x:hidden");
+						
+		});
+		
+		$('#div_credito').on('show.bs.modal', function () {		
+			
+			$('#div_credito .modal-content').attr('style', 'height: ' + $(window).height() * 0.9 + "px !important");
+			$('#div_credito .modal-body').attr('style', 'height: ' + $(window).height() * 0.8 + "px !important");
+			$('#div_credito_body').attr('style', 'height: ' + $(window).height() * 0.8 + 'px !important');
+			
+		});		
+		
+    });
+	
+	//Formatea un numero
+	function separadorMiles(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+	
+	//Genera un cuadro de notificacion
+    function notificacion(titulo, mensaje, clase) {
+
+	   toastr.options = {
+		   "closeButton": true,
+		   "debug": true,
+		   "positionClass": "toast-top-center",
+		   "onclick": null,
+		   "showDuration": "1000",
+		   "hideDuration": "1000",
+		   "timeOut": "2000",
+		   "extendedTimeOut": "1000",
+		   "showEasing": "swing",
+		   "hideEasing": "linear",
+		   "showMethod": "fadeIn",
+		   "hideMethod": "fadeOut"
+	   };
+	
+	   toastr[clase](mensaje, titulo);
+    
+	}//fin notificacion
+	
+	//Configura los campos de direccion segun el pais
+	function configurarPaises()
+	{
+	
+		if ($("#ContentPlaceHolder1_hf_paisId").val() != "1")
+		{
+			$("#tb_recepciondireccion").removeProp("readonly");
+			$("#sp_recepciondireccion").hide();
+			
+			$("#tb_recepcionentrecalles").removeProp("readonly");
+			$("#sp_recepcionentrecalles").hide();
+			
+			$("#tb_recepcionentrecalles2").removeProp("readonly");
+			$("#sp_recepcionentrecalles2").hide();
+			
+			$("#div_recepcioncodpos").css("visibility","hidden");
+			$("#div_recepcioncodpos").removeClass("required");
+		}
+		else
+		{
+			$("#ContentPlaceHolder1_div_recepciondocumento").css("visibility","hidden");
+		}
+		
+	}
+	
+	//DOCUMENT READY
+    jQuery(document).ready(function () {
+	
+		//Solo Alfanumericos
+		$(function() {
+			$(".noCaracteresEspeciales").bind("keypress",function(e){				
+				if (String.fromCharCode(e.which).match(/[^0-9a-zA-Z ]/g)) {
+					return false;
+				}
+			});
+		});	
+		
+		//Configura la visualizacion segun pais
+		configurarPaises();
+	
+		//Carga los primeros articulos
+		cargarProductos(per_page, page);
+
+		//Arma el paginador
+		$('#paginador').bootpag({
+			total: total_pages,         // total pages
+			page: 1,                    // default page
+			maxVisible: total_pages,    // visible pagination
+			leaps: true                 // next/prev leaps through maxVisible
+		}).on("page", function (event, num) {
+			cargarProductos(per_page, num);
+			$('html, body').animate({ scrollTop: 0 }, 'fast');
+		});
+	
+		//Instancia el carrito
+		carrito = new EssenCarrito(
+			{				
+				"limiteCredito" : parseInt($("#ContentPlaceHolder1_hf_limiteCredito").val()),
+				"valoriza" : $("#ContentPlaceHolder1_hf_valoriza").val(),
+				"aceptaMediosDePago" : $("#ContentPlaceHolder1_hf_tarjetaCredito").val()
+			}
+		);
+		
+		//Instancia el wizard
+		wizard = new EssenCarritoWizard(
+			{
+				"pasos" : [{'titulo':'Detalle de tu Pedido','tabId':'tab1'}, {'titulo':'Plan Canje','tabId':'tab2'}, {'titulo':'Detalle de Entrega','tabId':'tab3'},{'titulo':'Confirm&aacute; tu Pedido','tabId':'tab4'},{'titulo':'Pago','tabId':'tab5'}],
+				"controlTituloId" : "h_titulo",
+				"botonAnterior" : "b_anterior",
+				"botonSiguiente" : "b_siguiente"
+			}
+		);		
+		
+		//Asigna las funciones a los botones del wizard
+		$("#b_anterior").click(function()
+			{ 
+				wizard.retroceder();
+			}
+		);
+		
+		$("#b_siguiente").click(function()
+			{ 			
+				wizard.avanzar();
+			}
+		);
+		
+		//Alerta ante abandono de pagina
+		/*$(window).bind('beforeunload', function(){
+			
+			if (carrito.obtenerCantidadItems() > 0)
+			{
+				alert('Tiene articulos en el carrito. Seguro desea abandonar?');
+				return false;
+			}
+		});*/
+		
+		//Carga el dropdown de expiration year (MP)
+		for (f = 0, i = new Date().getFullYear(); f < 10; f++)
+			$('#cardexpirationyear').append($('<option />').val(i + f).html(i + f));
+
+        $('#s_CarritoPuntosTotalPsvp').html("0");
+        $('#l_monto_total').html("0");
+        $('#s_CarritoPuntosTotalPuntos').html("0");
+        $('#s_notificacion_carrito').html("0");
+        $('#s_CarritoPuntosTotalPsvpWishList').html("0");
+        $('#s_CarritoPuntosTotalPuntosWishList').html("0");
+        $('#s_notificacion_wish').html("0");        		
+		
+		//Botones de reducir cantidad (plan canje)
+		$('.minus-button-planCanje').click((e) => {
+
+            const currentInput = $(e.currentTarget).next('input');          
+           
+            let minusInputValue = $(currentInput).val();
+            let valorMinimo = $(currentInput).attr("min");
+
+            minusInputValue--;
+
+            if (minusInputValue < valorMinimo)
+            { minusInputValue++; }
+            
+            $(currentInput).val(minusInputValue);
+			$("#ContentPlaceHolder1_hf_planCanje_cantidad").val(minusInputValue);			
+			
+			$("#s_planCanjeDescuento").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(minusInputValue * parseInt($("#ContentPlaceHolder1_hf_planCanjePSVP_valor").val())));
+			$("#s_planCanjeDescuentoNC").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(minusInputValue * parseInt($("#ContentPlaceHolder1_hf_planCanje_valor").val())));
+			
+        });
+
+		//Botones de aumentar cantidad (plan canje)
+        $('.plus-button-planCanje').click((e) => {
+
+            const currentInput = $(e.currentTarget).prev('input');           
+       
+            let plusInputValue = $(currentInput).val();
+            let valorMaximo = $(currentInput).attr("max");
+            plusInputValue++;
+
+            if (plusInputValue > valorMaximo)
+				{plusInputValue--;}
+
+            $(currentInput).val(plusInputValue);
+            $("#ContentPlaceHolder1_hf_planCanje_cantidad").val(plusInputValue);
+			
+			$("#s_planCanjeDescuento").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(plusInputValue * parseInt($("#ContentPlaceHolder1_hf_planCanjePSVP_valor").val())));
+			$("#s_planCanjeDescuentoNC").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(plusInputValue * parseInt($("#ContentPlaceHolder1_hf_planCanje_valor").val())));
+
+        });
+
+		//Plan Canje?
+		if ($("#ContentPlaceHolder1_hf_planCanje_habilitado").val()=="0")
+		{
+			$('#rootwizard').bootstrapWizard('disable', 1);	
+			$('#rootwizard').bootstrapWizard('hide', 1);	
+			$("#s_planCanjeDescuento").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " 0");
+			$("#s_planCanjeDescuentoNC").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " 0");
+		}
+    
+    });
+	
+	//Filtra los articulos
+	function filtrarDatos(opcion) {
+
+		//Busca los checks de categoria y arma el filtro actual
+		filtroActual = [];
+		
+		//Para busqueda de texto
+		var filtroTexto = "";
+		
+		//Es el filtro de mobile o el de pantalla desktop?	
+		if(opcion == 'desktop')
+		{
+			$.each($("#ContentPlaceHolder1_div_panel_filtros_body input[type=checkbox]:checked"), function () {				
+				filtroActual.push($(this).data("valor"));
+			});
+			
+			filtroDesktop = "1";
+		}
+		else
+		{
+			$.each($("#div_filtros_categorias input[type=checkbox]:checked"), function () {
+				filtroActual.push($(this).data("valor"));
+			});
+			
+			filtroDesktop = "0";
+		}
+
+		//Recarga los articulos
+		cargarProductos(per_page, 1);
+	}
+	
+	//Busca un articulo por codigo dentro de todos los articulos a mostrar
+	//Devuelve el indice en caso de encontrarlo o -1 si no lo encuentra
+	function buscarArticuloXCodigo(codigoABuscar)
+	{
+		for (f=0; f < dataProductos.length; f++)
+		{	
+			if (dataProductos[f].Codigo == codigoABuscar)
+			{					
+				return f;
+			}
+		}
+		
+		return -1;
+	}	
+        
+	//Carga los productos
+	//Recibe cantidad de items por pagina, nro de pagina
+	function cargarProductos(per_page, page) {
+
+		//Obtiene los datos de articulos
+		//Si es la primera vez, lo arma desde el json que deja la web
+		//if (dataProductos == null)
+		dataProductos = $.parseJSON($("#ContentPlaceHolder1_hf_lista_articulos").val());
+				 
+		var mostrar;		
+		
+		//Filtro de texto, de desktop o mobile
+		var cadena = "";
+		if(filtroDesktop == "0")
+			cadena = $("#tb_filtroArticulo").val();
+		else
+			cadena = $("#tb_filtroArticuloLg").val();
+		
+		//Arma un array con todos los articulos para ver si debe filtrarlos
+		dataProductosFiltrados = dataProductos;
+		
+		//Filtra los resultados si hay filtros
+		if (filtroActual.length > 0) {
+
+			dataProductosFiltrados = $.grep(dataProductos, function (n, i) {
+
+				mostrar = 0;
+
+				$.each(filtroActual, function (index, value) {
+					
+					if (n.Detalle == value) {                            
+						mostrar = 1;
+						return true;
+					}
+				});
+
+				//Hay texto a filtrar?
+				if (cadena != "") {
+
+					if (n.Codigo.search(cadena) > -1 || n.Descripcion.search(cadena) > -1)
+						mostrar = mostrar & 1;
+					else
+						mostrar = 0;
+				}
+
+				if (mostrar == 1)
+					return true;
+
+			});
+		}
+		
+		//Totales de items y paginas a mostrar
+		total_items = dataProductosFiltrados.length;
+		
+		if (total_items % per_page > 0)
+			total_pages = parseInt(total_items / per_page) + 1;
+		else
+			total_pages = parseInt(total_items / per_page);
+		
+		//Actualiza paginador
+		$('#paginador').bootpag({ total: total_pages });
+
+		//Variables para la paginacion
+		var comienzo = (page - 1) * per_page;
+		var fin = comienzo + per_page;
+		var contenido_plantilla = "";
+		var claseStock = ""; var labelStock = "";
+		var deshabilitar_carga = "";
+		var deshabilitar_aumentar = "";
+		var sinStockAviso = "";
+
+		//Itera a traves de los datos
+		$.each(dataProductosFiltrados.slice(comienzo, fin), function (i, item) {
+
+			//Si el articulo pertenece a un combo, no lo muestra.
+			if (item.ComboAlQuePertenece != "")
+				return;
+
+			//Es Combo?
+			if (item.ESCombo == 1)
+				esCombo = true;
+			else
+				esCombo = false;
+
+			//La ganancia es la diferencia entre el precio publico y el valor factura            
+			costo = Math.round(item.ValorFactura);
+			dbganancia = item.pvsp - costo;
+			strganancia = separadorMiles(Math.round(dbganancia))
+
+			//Valoriza?
+			if ($("#hf_valoriza.Value").val() == "0") {
+				item.psvp = 0;
+				item.puntos = 0;
+				costo = 0;
+				dbganancia = 0;
+				strganancia = "0";
+			}
+
+			sinStockAviso = ""; sinStockFecha = "";
+
+			//Selecciona la imagen del semaforo de stock segun los porcentajes de consumido
+			if (item.SemaforoPorcentaje <= 70) {
+				img_stock = "img/PedidosSemaforo/alto2.png";
+				claseStock = "bg-green-seagreen";
+				labelStock = "Stock alto";
+			}
+			else if (item.SemaforoPorcentaje <= 90) {
+				img_stock = "img/PedidosSemaforo/medio2.png";
+				claseStock = "bg-yellow-crusta";
+				labelStock = "Stock medio";
+			}
+			else if (item.SemaforoPorcentaje <= 99.999) {
+				img_stock = "img/PedidosSemaforo/bajo2.png";
+				claseStock = "bg-red-flamingo";
+				labelStock = "Stock bajo";
+			}
+			else if (item.SemaforoPorcentaje <= 100) {
+				img_stock = "img/PedidosSemaforo/sin2.png";
+				deshabilitar_carga = "disabled";
+				claseStock = "bg-red-flamingo";			
+				if (item.FechaReposicion != "")
+					labelStock = "sin stock<br>HASTA: " + item.FechaReposicion;
+				else
+					labelStock = "sin stock";
+				sinStockAviso = ";filter: grayscale(100%);-webkit-filter: grayscale(100%);";
+				
+			}
+
+			//Si no se permite aumentar la cantidad
+			if ($("#ContentPlaceHolder1_hf_aumentarCantidad").val() == "0") {
+				deshabilitar_aumentar = "disabled";
+			}
+
+			//Obtiene la imagen del producto
+			fotoCodigo = "../../imgs/NotasPedido/" + item.Codigo + ".jpg";
+
+			//Foto de error si no encuentra alguna
+			fotoError = "../../imgs/NotasPedido/sinFoto.jpg";
+
+			//Tiene datos adicionales? Si es asi, le agrega la cucarda
+			tieneDatosAdicionales = false;
+			if (item.Promocion == 1) {
+				datosAdicionales = "Promo! <i class=\"fa fa-star\" aria-hidden=\"true\" style=\"color:yellow\"></i>";
+				datosAdicionalesClase = "";
+				tieneDatosAdicionales = true;
+			}
+			else if (item.NoDisponible == 1) {
+				datosAdicionales = "No Disponible";
+				datosAdicionalesClase = "bg-red-flamingo";
+				tieneDatosAdicionales = true;
+			}
+			else if (item.Postadatado == 1) {
+				datosAdicionales = "Postdatado";
+				datosAdicionalesClase = "";
+				tieneDatosAdicionales = true;
+			}
+			else if (item.Descuento == 1) {
+				datosAdicionales = "Descuento <i class=\"fa fa-star\" aria-hidden=\"true\" style=\"color:yellow\"></i>";
+				datosAdicionalesClase = "";
+				tieneDatosAdicionales = true;
+			}
+
+			contenido_plantilla += "<div class='item bg_white w3-card-4 list-group-item' style='margin-bottom: 5px; margin-right: 10px;'>";
+
+			contenido_plantilla += "<div class='price-ribbon " + claseStock + "' style='top:40px' > " + labelStock + "</div>";			
+
+			//DatosAdicionales
+			if (tieneDatosAdicionales)
+				contenido_plantilla += "<div class=\"price-ribbon " + datosAdicionalesClase + " \">" + datosAdicionales + "</div>";
+
+			contenido_plantilla += "<div class=\"thumbnail\">";
+			contenido_plantilla += "<div class=\"row caption\" style=\"padding-top:0.5rem;\">";
+			contenido_plantilla += "<div class=\"box \"><div class=\"col-xs-12 col-md-12 imgProducto gal-item \" style='width: 33%'>";
+			contenido_plantilla += "<img class='imgItem' style='height:auto; position:relative; display:inline-block; left:50%; transform: translate(-50%)" + sinStockAviso + "' ID='i_producto_" + item.Codigo + "' src='" + fotoCodigo + "' onerror=\"this.src = '" + fotoError + "'\"/>";			
+
+			//Plan canje?
+			if (item.PlanCanje >= 1 && $("#ContentPlaceHolder1_hf_planCanje_habilitado").val() == "1")
+				contenido_plantilla += "<img src=\"NotasPedido/img/Boton-Plan-Canje-Web.png\" style=\"position:absolute;top:25px;left:25px;z-index:2;width:30px;height:30px\" title=\"Plan Canje Essen\" />";
+
+			contenido_plantilla += "<div class=\"modal fade\" id=\"" + item.codigo + "\" tabindex=\"-1\" role =\"dialog\">";
+			contenido_plantilla += "<div class=\"modal-dialogCarrito\">";
+			contenido_plantilla += "<div class=\"modal-content\">";
+			contenido_plantilla += "<button type =\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\" ><span aria-hidden=\"true\">×</span></button>";
+			contenido_plantilla += "<div class=\"modal-body\">";
+			contenido_plantilla += "<img src=\"" + fotoCodigo + "\" onerror=\"this.src = '" + fotoError + "'\"/>";			
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"col-xs-4 col-md-12 margin-top-10 detalleProducto\" style='margin-left: 5px; width: 52%'>";
+			contenido_plantilla += "<div class=\"col-md-12 descripcionArt\" style=\"padding-left: 0px;padding-right: 0px;\">";
+			contenido_plantilla += "<li style=\"list-style:none\"><h4 class=\"group inner list-group-item-heading\"><span id=\"d_descripcion_" + item.Codigo + "\" style=\"font-size:14px;overflow: hidden;text-overflow: ellipsis; display: block;white-space: normal;\" class=\"detalleLetra uppercase font-weight-400\"><b>" + item.Descripcion + "</b></span></h4></li>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"col-md-12 codigoArt\" style=\"padding-left: 0px;padding-right: 0px;\">    ";
+			contenido_plantilla += "<li style=\"list-style:none\">C&oacute;digo: <span class=\"font-12 font-grey-gallery font-weight-400\">" + item.Codigo + "</span></li>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"col-md-12\" style=\"padding-left: 0px;padding-right: 0px;\">    ";
+			contenido_plantilla += "<div class=\"col-xs-6 col-md-6 margin-top-10 pvspCarrito\" style=\"padding: 0;\">";
+			contenido_plantilla += "<li style=\"list-style:none\">Psvp: " + $("#ContentPlaceHolder1_hf_monedaCodigo").val() + " <span class=\"font-14 font-grey-gallery font-weight-400\"><b>" + separadorMiles(item.pvsp) + "</b></span></li>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"col-xs-6 col-md-6 margin-top-10 pvspCarrito\" style=\"padding: 0;\">";
+			contenido_plantilla += "<li style=\"list-style:none\">Puntos: <span class=\"font-14 font-grey-gallery font-weight-400\"><b>" + item.puntos + "</b></span></li>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"col-md-12\"  style=\"padding-left: 0px;padding-right: 0px;\">    ";
+			contenido_plantilla += "<div class=\"col-xs-6 col-md-6 margin-top-4 pvspCarrito\" style=\"padding: 0;\">";
+			contenido_plantilla += "<li style=\"list-style:none\">A pagar: " + $("#ContentPlaceHolder1_hf_monedaCodigo").val() + " <span class=\"font-14 font-grey-gallery font-weight-400\"><b>" + separadorMiles(costo) + "</b></span></li>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"col-xs-6 col-md-6 margin-top-4 pvspCarrito\" style=\"padding: 0;\">";
+			contenido_plantilla += "<li style=\"list-style:none\">Ganancia: " + $("#ContentPlaceHolder1_hf_monedaCodigo").val() + " <span class=\"font-14 font-grey-gallery font-weight-400\"><b>" + strganancia + "</b></span></li>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"col-xs-4 col-md-6 margin-top-20 detalleNumerador\" style='margin-left:5px; width: 16%'>";
+			contenido_plantilla += "<div class=\"qty mt-5\"> ";
+			contenido_plantilla += "<a class=\"w3-button w3-circle w3-large w3-card-4 minus-button\" " + deshabilitar_carga + "><i class=\"fa fa-minus\"></i></a>&nbsp;&nbsp;&nbsp;";
+			contenido_plantilla += "<input id=\"cantidad_" + item.Codigo + "\"  type =\"number\" class=\"count\" min=\"0\" max=\"" + item.CantidadMaximaPermitida + "\" value=\"" + $("#ContentPlaceHolder1_hf_cantidadInicial").val() + "\" disabled>&nbsp;&nbsp;&nbsp;";
+			contenido_plantilla += "<a class=\"w3-button w3-circle w3-large w3-card-4 plus-button\" " + deshabilitar_carga + " " + deshabilitar_aumentar + "><i class=\"fa fa-plus\"></i></a>";
+			
+			if (screen.width > 600)
+				contenido_plantilla += "<span style=\"inline\" class=\"pull-right mobileHide\">Agregar al carrito:</span>";
+			
+			contenido_plantilla += "</div></div>";
+			contenido_plantilla += "<div class=\"col-xs-4 col-md-2 margin-top-20 detalleIconoCarrito\" style='width: 6%'>";
+			contenido_plantilla += "<a class=\"w3-button w3-circle w3-large w3-card-4\" href=\"javascript: agregarAlCarrito('" + item.Codigo + "','" + item.Descripcion + "'," + esCombo + ",$('#cantidad_" + item.Codigo + "').val()," + item.pvsp + "," + item.puntos + "," + costo + "," + dbganancia + "," + item.CantidadMaximaPermitida + "," + item.PlanCanje + ")\"><i class=\"fa fa-shopping-cart\"></i></a><br/><br/>  ";
+			contenido_plantilla += "</div>";
+			contenido_plantilla += "<div class=\"row display-hide\">    ";
+			contenido_plantilla += "<div class=\"col-xs-12 col-md-12 margin-top-20\">";
+			contenido_plantilla += "<li style=\"list-style:none\"><span id=\"d_ver_cantidades_disponibles_" + item.Codigo + "\" class=\"font-12 font-grey-gallery font-weight-400\"><i>*Puedes Pedir hasta X Unidades.</i></span></li>";
+			contenido_plantilla += "</div></div></div></div></div>";
+			
+		});
+
+		$("#div_lista_articulos").html(contenido_plantilla);            
+
+		//Asigna las funciones de los botones de carga
+		prepararBotonesCarga();
+		
+	}  	
+
+	//Check del modal de filtros
+	function filtrarCheck(){
+
+		// if all checkbox are selected, check the selectall checkbox and viceversa  
+		// $(".case").prop("checked", this.checked);  
+
+		if ($(".case").length == $(".case:checked").length) {  
+			$(".case").prop("checked", false); 
+			$(".selectall").prop("checked", false); 			
+		} 
+		else 
+		{  
+			$(".case").prop("checked", true);  
+			$(".selectall").prop("checked", true);  
+		}
+	}      
+	
+	//Prepara los botones de carga de articulos
+	function prepararBotonesCarga()
+	{
+		//Botones de reducir cantidad (articulos)
+        $('.minus-button').click((e) => {
+
+            const currentInput = $(e.currentTarget).next('input');
+
+            var Codigo = currentInput.attr('id').split('_')[1];
+
+            var PrecioUnitario = $('#d_psvp_' + Codigo + '').text();
+            var PuntosUnitario = $('#d_puntos_' + Codigo + '').text();
+
+            let minusInputValue = $(currentInput).val();
+            let valorMinimo = $(currentInput).attr("min");
+
+            minusInputValue--;
+
+            if (minusInputValue < valorMinimo)
+            { minusInputValue++; }
+
+            //$(currentInput).val(minusInputValue * aumentarCantidad);
+            $(currentInput).val(minusInputValue);
+            var idPrecioTotal = parseInt(PrecioUnitario) * minusInputValue;
+            $('#d_total_psvp_' + Codigo + '').text(idPrecioTotal);
+
+            var idPuntosTotal = parseInt(PuntosUnitario) * minusInputValue;
+            $('#d_total_puntos_' + Codigo + '').text(idPuntosTotal);
+        });
+
+		//Botones de aumentar cantidad (articulos)
+        $('.plus-button').click((e) => {
+
+            const currentInput = $(e.currentTarget).prev('input');           
+
+            var Codigo = currentInput.attr('id').split('_')[1];
+
+            var PrecioUnitario = $('#d_psvp_' + Codigo + '').text();
+            var PuntosUnitario = $('#d_puntos_' + Codigo + '').text();
+
+            let plusInputValue = $(currentInput).val();
+            let valorMaximo = $(currentInput).attr("max");
+            plusInputValue++;
+
+            if (plusInputValue > valorMaximo)
+            {plusInputValue--;}
+
+            //$(currentInput).val(plusInputValue * aumentarCantidad);
+            $(currentInput).val(plusInputValue);
+            var idPrecioTotal = parseInt(PrecioUnitario) * plusInputValue;
+            $('#d_total_psvp_' + Codigo + '').text(idPrecioTotal);
+
+            var idPuntosTotal = parseInt(PuntosUnitario) * plusInputValue;
+            $('#d_total_puntos_' + Codigo + '').text(idPuntosTotal);
+        });
+	}
+	
+	//Abre una pagina con google maps
+	function geoLocalizarDireccion(parms) {
+        
+		var url = "/latam/site/RegistroCliente/ListadoDirecciones_geolocalizar.aspx?";
+		
+		var h = $(window).height() / 2;
+		var w = $(window).width() / 2;
+
+		window.open(url + parms, 'popup_window', 'width=' + w + ',height=' + h + ',left=50,top=50,resizable=yes,toolbar=no');
+	}
+    
+    //Seleccionar Filtros
+    function seleccionaFiltro(misender)
+    {
+        var hola = $(misender).attr('id');
+        if ($('#ContentPlaceHolder1_categorias_seleccionadas').html().match($(misender).children().eq(0).html())) { }
+        else
+            $('#ContentPlaceHolder1_categorias_seleccionadas').append('<a id="s_filtros_' + $(misender).children().eq(0).html() + '" class="badge" onclick="borrarFiltro(this);">' + $(misender).children().eq(0).html() + '<i class="fa fa-window-close"></i></a>&nbsp;&nbsp;');
+
+        var listaFiltros = "";
+
+        if ($('#ContentPlaceHolder1_hf_lista_filtros').val() != "") {
+                listaFiltros = $('#ContentPlaceHolder1_hf_lista_filtros').val() + "," + $(misender).children().eq(0).html();
+        }
+        else
+        {
+            listaFiltros = $(misender).children().eq(0).html();
+        }
+
+        $('#ContentPlaceHolder1_hf_lista_filtros').val(listaFiltros);
+
+    }
+
+    //Borrar Filtros
+    function borrarFiltro(misender) {
+        
+        debugger;
+        misender.remove();
+        var listaFiltros = "";
+        listaFiltros = $('#ContentPlaceHolder1_hf_lista_filtros').val();
+        //if (listaFiltros.contains("," + $(misender).children().eq(0).html())) {
+        if (listaFiltros.indexOf("," + $(misender).eq(0).text()) != -1) {
+            listaFiltros = listaFiltros.replace("," + $(misender).eq(0).text(), "");
+
+        }
+        else if (listaFiltros.indexOf($(misender).eq(0).text()) != -1)
+        {
+            listaFiltros = listaFiltros.replace($(misender).eq(0).text(), "");
+        }
+
+        $('#ContentPlaceHolder1_hf_lista_filtros').val(listaFiltros);
+    }
+
+    //Aplicar Filtros
+    /*function aplicarFiltros()
+    {
+        var pvspFrom = $('#rangePsvp').data().from;
+        var pvspTo = $('#rangePsvp').data().to;
+
+        var puntosFrom = $('#rangePuntos').data().from;
+        var puntosTo = $('#rangePuntos').data().to;
+
+        if ($('#ContentPlaceHolder1_hf_lista_filtros').val() != "") {
+            var filtrosCategorias = $('#ContentPlaceHolder1_hf_lista_filtros').val();
+            $('#ContentPlaceHolder1_hf_lista_filtros').val(pvspFrom + "," + pvspTo + "," + puntosFrom + "," + puntosTo + "," + filtrosCategorias);
+        }
+        else
+        {
+            $('#ContentPlaceHolder1_hf_lista_filtros').val(pvspFrom + "," + pvspTo + "," + puntosFrom + "," + puntosTo);
+        }
+    }*/
+
+    //fUNCIONES PARA MOSTRAR EL CARRITO
+    function mostrar(control) {
+        $("div.ytp-panel").remove();
+        document.getElementById(control).style.width = "100%";
+    }
+
+    //cerrar Overlay pulsando en la X
+    function ocultar(control) {
+        document.getElementById(control).style.width = "0%";         
+    }
+
+    function mostrarDetalles() {
+        mostrar('Detalles');
+        return false;
+    }
+
+     /*function mostrarDetallesWishList() {
+        mostrar('DetallesWishList');
+        return false;
+    }*/
+	//FIN FUNCIONES PARA MOSTRAR EL CARRITO
+	
+	//Actualiza los totales	
+	function actualizarTotales()
+	{
+		var totales = carrito.obtenerTotales();
+		var total = totales.totalCosto;		
+		
+		//Totales generales
+		$("#lit_TotalPuntos").html(separadorMiles(totales.totalPuntos));
+		$("#lit_TotalCosto").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(total));
+			
+		$('#s_notificacion_carrito').html(separadorMiles(totales.totalCantidad));
+		
+		//Psvp
+		$('#l_monto_total_psvp').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(totales.totalPsvp));
+		
+		//Costo
+		$('#s_CarritoTotalPsvp').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(totales.totalPsvp));
+		$('#ContentPlaceHolder1_hf_monto_total').val(separadorMiles(totales.totalPsvp));
+		$('#l_monto_total').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(totales.totalCosto));
+		$('#s_CarritoTotalPuntos').html("Puntos: " + totales.totalPuntos);
+		$('#s_CarritoTotalCosto').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(totales.totalCosto));
+		$('#s_CarritoGanancia').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(totales.totalGanancia));		
+				
+		//Plan Canje
+		$("#s_planCanjeCantidad").html(totales.totalPlanCanje);
+		$("#cantidad_planCanje").val(0);
+		$("#s_planCanjeDescuento").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " 0");
+		$("#s_planCanjeDescuentoNC").html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " 0");
+		$("#cantidad_planCanje").attr("max",totales.totalPlanCanje);
+		
+		//Actualiza el total
+		$("#ContentPlaceHolder1_hf_montoCarrito").val(total);
+		
+	}//fin actualizarTotales	
+	
+	//Actualiza valores de Confirmacion de pedido
+	function actualizarDatosConfirmacion()
+	{	
+		//Total del carrito
+		var total = carrito.obtenerTotalCosto();	
+		var total_psvp = carrito.obtenerTotalPsvp();
+		var total_puntos = carrito.obtenerTotalPuntos();
+				
+		//Plan Canje
+		var cantidadPlanCanje = parseInt($("#cantidad_planCanje").val());
+		if (cantidadPlanCanje > 0)
+		{	
+			var totalDescuentoPlanCanje = cantidadPlanCanje * parseInt($("#ContentPlaceHolder1_hf_planCanje_valor").val());
+			var totalDescuentoPlanCanjePsvp = cantidadPlanCanje * parseInt($("#ContentPlaceHolder1_hf_planCanjePSVP_valor").val());
+			
+			total = total - totalDescuentoPlanCanje;
+			total_psvp = total_psvp - totalDescuentoPlanCanjePsvp;
+			
+			//Psvp
+			$("#h_descuentoPlanCanje_psvp").css("visibility","visible");
+			$("#l_descuentoPlanCanje_psvp").html(" - " + $("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(totalDescuentoPlanCanjePsvp));
+			
+			//Costo
+			$("#h_descuentoPlanCanje").css("visibility","visible");
+			$("#l_descuentoPlanCanje").html(" - " + $("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(totalDescuentoPlanCanje));
+		}
+		else
+		{
+			$("#h_descuentoPlanCanje").css("visibility","hidden");
+			$("#h_descuentoPlanCanje_psvp").css("visibility","hidden");
+		}
+		
+		//Pedidos Pendientes
+		//Solo se muestran si van a ser liberados: El pedido se envia a una direccion de recepcion del emprendedor
+		if ($("#ContentPlaceHolder1_hf_vaADireccionPropia").val() == "1")
+		{			
+			$("#div_pedidosPendientes").show();
+			//$('#l_pedidosPendientes').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles($("#ContentPlaceHolder1_hf_pedidosPendientesTotal").val()));		
+			//total += parseFloat($("#ContentPlaceHolder1_hf_pedidosPendientesTotal").val());
+		}
+		else
+		{
+			$("#div_pedidosPendientes").hide();
+		}
+		
+		//Flete: Si llega al tope de puntos, se muestra como bonificado, si no, se suma el valor del mismo al pedido		
+		if (total_puntos >= parseInt($("#ContentPlaceHolder1_hf_flete_puntos").val()))
+		{
+			$('#l_flete').html("Bonificado");
+            $('#l_total_a_pagar').html($('#l_monto_total').html());
+            $("#hf_xTotalPagar").val($('#l_monto_total').html());
+		}
+		else
+		{
+			var flete = parseInt($("#ContentPlaceHolder1_hf_flete_valor").val());
+			total += flete;
+			
+			$('#l_flete').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(flete));
+            $('#l_total_a_pagar').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(total));
+            $("#hf_xTotalPagar").val($('#l_total_a_pagar').html());			
+		}		
+		
+		//Si tiene pedidos pendientes, muestra el mensaje		
+		if ($("#ContentPlaceHolder1_hf_pedidosPendientes").val() == "1")		
+			$("#div_pedidosPendientes").show();		
+		else		
+			$("#div_pedidosPendientes").hide();		
+		
+		//Actualiza el total
+		$("#ContentPlaceHolder1_hf_montoCarrito").val(total);		
+		$('#l_total_a_pagar').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(total));
+		
+		$('#l_total_a_pagar_psvp').html($("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles(total_psvp));
+		
+	}//fin actualizarDatosConfirmacion
+	
+    //Agrega productos al carrito
+	//Devuelve true si fue satisfactorio o false si hubo error
+    function agregarAlCarrito(codigoArticulo, descripcion, esCombo, cantidad, psvp, puntos, costo, ganancia, maximaCantidad, planCanje) {
+
+        if (cantidad == 0 || cantidad == "") {
+            notificacion('<strong>&iexcl;Atenci&oacute;n&excl;</strong>','&iexcl;Debes agregar al menos una unidad&excl;','error');
+            return false;
+        }
+        else {
+			
+			//Verifica que no supere el tope
+			if (parseInt(cantidad) + parseInt(carrito.obtenerCantidad(codigoArticulo)) > parseInt(maximaCantidad))
+			{
+				notificacion('<strong>&iexcl;Atenci&oacute;n&excl;</strong>','&iexcl;No puede superar la cantidad maxima permitida&excl;','error');				
+				return false;
+			}					
+			
+			//Limpia el control de cantidad
+			$("#cantidad_" + codigoArticulo).val("0");
+
+			//Intenta agregar el item
+			if (carrito.agregarProducto(codigoArticulo, descripcion, esCombo, cantidad, psvp, puntos, costo, ganancia, planCanje))
+			{		
+				notificacion('<strong>&iexcl;Mi Carrito&excl;</strong>', 'El art&iacute;culo fue agregado correctamente', 'success')				
+				actualizarTotales();
+				listarArticulosCarrito();
+				
+				//Quita el cartel del carrito vacio			
+				$("#h_articulos_carrito").hide();
+				
+				return true;
+			}
+			else
+			{
+				notificacion('<strong>&iexcl;Atenci&oacute;n&excl;</strong>',carrito.mensaje,'error');
+				return false;
+			}	
+			
+        }
+    
+	}//fin agregarAlCarrito	
+	    
+    //Borra productos del carrito
+    function quitarDelCarrito(codigoArticulo, mostrarNotificacion = 1) {
+
+        //Limpia el control de cantidad
+		$("#cantidad_" + codigoArticulo).val("0");
+
+		//Intenta quitar el item
+		if (carrito.quitarProducto(codigoArticulo))
+		{	
+			if (mostrarNotificacion == 1)
+				notificacion('<strong>&iexcl;Mi Carrito&excl;</strong>', 'El art&iacute;culo fue eliminado correctamente', 'info')				
+			
+			actualizarTotales();
+			listarArticulosCarrito();
+			
+			//Quita el cartel del carrito vacio si no hay mas articulos
+			if (carrito.obtenerCantidadItems() == 0)
+				$("#h_articulos_carrito").show();
+			
+			return true;
+		}
+		else
+		{
+			notificacion('<strong>&iexcl;Atenci&oacute;n&excl;</strong>',mensaje,'error');
+			return false;
+		}
+		
+    }//fin quitarDelCarrito
+
+    //Lista los productos del carrito actual
+	function listarArticulosCarrito() {
+
+		var divArticulosCarrito = $('#r_articulos_carrito');
+		divArticulosCarrito.html("");
+		
+		var totalFinal = 0;
+		var puntosFinal = 0;
+		var valorFacturaTotal = 0;
+		var valorGananciaTotal = 0;
+		var elemento = null;
+				
+		for (f=0; f < carrito.obtenerCantidadItems(); f++)
+		{			
+			elemento = carrito.obtenerProducto(f);			
+			ArmarTablaArticulosCarrito(elemento.codigoArticulo, elemento.descripcion, elemento.psvp, elemento.puntos, elemento.costo, elemento.cantidad)
+		}
+		
+	}//fin listarArticulosCarrito
+
+	//ArmarTablaArticulosCarrito
+	//Arma la tabla con los articulos cargados en el carrito
+    function ArmarTablaArticulosCarrito(codigoArticulo, descripcion, psvp, puntos, costo, cantidad) {
+
+        var divArticulosCarrito = $('#r_articulos_carrito');
+        var str = "";        
+
+		str += "<div class='row' style='box-shadow: 0px 1px 3px 0px rgba(166,166,166,1);margin-bottom: 16px;'> ";
+		str += "               <div class='col-xs-12 col-sm-12 col-md-3 text-center' style='text-align:-webkit-center;'> ";
+        str += "                       <img class='img-responsive' src='../../imgs/NotasPedido/" + codigoArticulo+".jpg' onerror=\"this.src = '../../imgs/NotasPedido/sinFoto.jpg'\" alt='prewiew' width='150' height='80'>";
+        str += "               </div> ";
+        str += "               <div class='col-xs-12 text-sm-center col-sm-12 text-md-left col-md-9' style='padding-top: 14px;'> ";
+        str += "                   <h5 class='product-name'><strong>" + descripcion + "</strong></h4> ";         
+        str += "               </div> ";
+        str += "               <div class='col-xs-12 col-sm-12 text-sm-center col-md-9 text-md-right row' style='padding-top: 14px;'> ";
+        str += "                   <div class='col-xs-12 col-sm-4 col-md-4 text-md-right' > ";
+        str += "                       <h5 title='PSVP'><strong>A pagar: $ " + separadorMiles(costo * cantidad) + "</strong></h5> ";
+        str += "                   </div> ";
+        str += "                   <div class='col-xs-12 col-sm-3 col-md-3 text-md-right' > ";
+        str += "                       <h5 title='PUNTOS'><strong>Puntos: " + separadorMiles(puntos * cantidad) + "</strong></h5> ";
+        str += "                   </div> ";
+        str += "                   <div class='col-xs-10 col-sm-4 col-md-4' > ";
+        str += "                       <h5 title='cantidad'><strong>Cantidad: " + cantidad + "</strong></h5> ";      
+        str += "                   </div> ";
+        str += "                   <div class='col-xs-1 col-sm-1 col-md-1 text-right' > ";
+        str += "                       <span class='font-grey-gallery bold'><a style='padding: 0px !important;'  href=\"javascript: quitarDelCarrito('" + codigoArticulo + "')\"><i class='fa fa-trash' style='font-size:25px;color:#ff7900;cursor:pointer'></i></a></span > ";
+        str += "                   </div> ";
+        str += "               </div> ";
+        str += "           </div> ";
+      
+        divArticulosCarrito.append(str);
+    
+	}//fin ArmarTablaArticulosCarrito
+	
+    //FIN FUNCIONES PARA MOSTRAR EL CARRITO
+
+	//Valida caracteres numericos
+    function validarSoloNumeros(evt) {
+        var theEvent = evt || window.event;
+        
+        if (theEvent.keyCode != 9
+            && theEvent.keyCode != 8
+            && theEvent.keyCode != 13
+            && theEvent.keyCode != 46
+            && theEvent.keyCode != 110
+           ) {
+            // Handle paste
+            if (theEvent.type === 'onpaste') {
+                key = event.clipboardData.getData('text/plain');
+            } else {
+            // Handle key press
+                var key = theEvent.keyCode || theEvent.which;
+                key = String.fromCharCode(key);
+            }
+            var regex = /[0-9]/;
+            if (!regex.test(key))
+            {
+                    theEvent.returnValue = false;
+                    if (theEvent.preventDefault) theEvent.preventDefault();
+                    
+            }
+        }
+    }
+
+	//Valida caracteres alfabeticos
+    function validarSoloLetras(evt) {
+        var theEvent = evt || window.event;
+        
+        if (theEvent.keyCode != 9
+            && theEvent.keyCode != 8
+            && theEvent.keyCode != 13
+            && theEvent.keyCode != 46
+            && theEvent.keyCode != 110
+            && theEvent.keyCode != 190
+           ) {
+            // Handle paste
+            if (theEvent.type === 'onpaste') {
+                key = event.clipboardData.getData('text/plain');
+            } else {
+            // Handle key press
+                var key = theEvent.keyCode || theEvent.which;
+                key = String.fromCharCode(key);
+            }
+            var regex = /[a-zA-Z]/;
+            if (!regex.test(key))
+            {
+                theEvent.returnValue = false;
+                if(theEvent.preventDefault) theEvent.preventDefault();
+            }
+        }
+    }	
+	
+	//Valida direccion de email
+    function validarEmail(evt) {
+        var theEvent = evt || window.event;
+        
+        if (theEvent.keyCode != 9
+            && theEvent.keyCode != 8
+            && theEvent.keyCode != 13
+            && theEvent.keyCode != 46
+            && theEvent.keyCode != 110
+            && theEvent.keyCode != 190
+           ) {
+            // Handle paste
+            if (theEvent.type === 'onpaste') {
+                key = event.clipboardData.getData('text/plain');
+            } else {
+            // Handle key press
+                var key = theEvent.keyCode || theEvent.which;
+                key = String.fromCharCode(key);
+            }
+            var regex = "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(\?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+(?:com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum|COM|ORG|NET|EDU|GOV|MIL|BIZ|MOBI|INFO|NAME|AERO|ASIA|JOBS|MUSEUM|es|ES)(\.[a-zA-Z]{2})?\b";
+            if (!regex.test(key))
+            {
+                theEvent.returnValue = false;
+                if(theEvent.preventDefault) theEvent.preventDefault();
+            }
+        }
+    }
+
+	//Valida solo numeros en pagar
+    function validarSoloNumerosPagar(evt) {
+
+        var theEvent = evt || window.event;
+        
+        if (theEvent.keyCode != 9
+            && theEvent.keyCode != 8
+            && theEvent.keyCode != 13
+            && theEvent.keyCode != 46
+            && theEvent.keyCode != 110
+           ) {
+            // Handle paste
+            if (theEvent.type === 'onpaste') {
+                key = event.clipboardData.getData('text/plain');
+            } else {
+            // Handle key press
+                var key = theEvent.keyCode || theEvent.which;
+                key = String.fromCharCode(key);
+            }
+            var regex = /[0-9]/;
+            if (!regex.test(key))
+            {
+                    theEvent.returnValue = false;
+                    if (theEvent.preventDefault) theEvent.preventDefault();
+                    
+            }
+        }
+    }
+
+    function abrirMP() {
+        $('#ContentPlaceHolder1_p_pago_credito').hide();
+        $('#ContentPlaceHolder1_p_pago_MP').show();
+
+    }
+	
+    function abrirCreditoEssen() {
+        $('#ContentPlaceHolder1_p_pago_credito').show();
+        $('#ContentPlaceHolder1_p_pago_MP').hide();
+
+    }    
+   
+	//Verifica destino y canal de venta	
+	function verificarDestinoyCanal()
+	{
+		if ($("#ContentPlaceHolder1_dd_canal").val() == -1)
+			return false;
+					
+		if ($("#ContentPlaceHolder1_rb_destino_venta").prop("checked") == false && $("#ContentPlaceHolder1_rb_destino_stock").prop("checked") == false)
+			return false;
+		
+		var destino = "0";
+		if ($("#ContentPlaceHolder1_rb_destino_stock").prop("checked") == true)
+			destino = "1";
+		
+		$("#ContentPlaceHolder1_hf_destino").val(destino);
+		$("#ContentPlaceHolder1_hf_canalVenta").val($("#ContentPlaceHolder1_dd_canal").val());		
+
+		return true;
+	}
+	
+	//Confirma la carga con tarjeta de credito
+	function pagarConTarjeta(operador)
+	{
+		//Verifica destino y canal de venta
+		/*if (!verificarDestinoyCanal())
+		{
+			bootbox.alert({message:"Por favor seleccione destino del pedido y canal de venta", animate:false});
+			return false;	
+		}*/
+		
+		//Pasa el monto: El minimo debe ser el valor del costo del carrito * 1.10. No puede pagar menos de eso
+		var valorMinimo = parseInt(parseInt($("#ContentPlaceHolder1_hf_montoCarrito").val()) * 1.10);
+		
+		$('#tb_monto').val(valorMinimo);
+		$('#tb_decimales').val("00");
+
+		$('#ContentPlaceHolder1_hf_pagoMinimo').val(valorMinimo);
+        $('#ContentPlaceHolder1_hf_planCanje_cantidad').val($("#cantidad_planCanje").val());
+		
+		//Carga la opcion de pago por Mercado Pago		
+        wizard.mostrar(4);
+	}	
+	
+	//Intenta reservar stock
+	//Devuelve el codigo de reserva o en blanco si no pudo hacerlo
+	//metodo sincronico
+	function reservarStock()
+	{
+		var reserva = "";
+		var datosArticulos = carrito.obtenerProductosCargados();
+		
+		$.ajax('../WebServices/PedidosCanjesWS.asmx/reservarStock', {
+		async: false,
+		type: 'POST',
+		dataType: "json",
+		headers: {
+			"Accept": "*/*",
+			"Content-Type": "application/json; charset=utf-8",
+			"X-Requested-With": "XMLHttpRequest"
+		},
+		beforeSend: function (hr) {
+			hr.setRequestHeader("TicketWS", ticketWS);
+		},
+		data: "{'articulos':'" + datosArticulos + "'}"
+		}).done(function (data) {
+
+			var devolucion = JSON.parse(data.d);
+			
+			if (devolucion.codigoRetorno > 0)
+			{
+				if (devolucion.codigoRetorno == 14)
+				{					
+					var html = "";
+					$("#t_faltantes_body").html("");                                
+					for(var f=0; f < devolucion.faltantes.length; f++)
+					{
+						html += "<tr><td><img class='img-responsive' src='../../imgs/NotasPedido/" + devolucion.faltantes[f].codigo + ".jpg' onerror=\"this.src = '../../imgs/NotasPedido/sinFoto.jpg'\" alt='prewiew' style='width:150px !important; height:80px !important;'></td><td align='left'>" + devolucion.faltantes[f].codigo + "</td><td align='left'>" + devolucion.faltantes[f].descripcion + "</td></tr>";
+						
+						//Quita del carrito los articulos faltantes (sin notificacion)
+						quitarDelCarrito(devolucion.faltantes[f].codigo, 0);
+					
+						//Obtiene el indice del articulo sin stock dentro de todos los articulos a mostrar						
+						var index = buscarArticuloXCodigo(devolucion.faltantes[f].codigo);
+						if (index == -1)
+						{
+							waitingDialog.hide();
+							bootbox.hideAll();
+							bootbox.alert("No se ha podido encontrar el articulo sin stock. Por favor comuniquese con la mesa de ayuda");
+							return;
+						}
+
+						//Lo marca sin stock						
+						dataProductos[index].SemaforoPorcentaje = 100;
+						dataProductos[index].CantidadMaximaPermitida = 0;
+					}
+					
+					//Recarga los productos
+					cargarProductos(20,1);
+					
+					//Muestra los faltantes y vuelve a la carga de pedido
+					$("#t_faltantes_body").append(html);
+					waitingDialog.hide();
+					bootbox.hideAll();
+					wizard.mostrar(0);
+					$('#div_faltantes').modal("show");
+				}
+				else
+				{
+					waitingDialog.hide();
+					bootbox.hideAll();
+					bootbox.alert("No se ha podido reservar stock: " + devolucion.mensajeError);
+				}	
+			}
+			else			
+			{				
+				reserva = devolucion.codigoReserva;
+			}			
+		})
+		.fail(function (xhr, status, error) {
+			waitingDialog.hide();
+			bootbox.hideAll();
+			bootbox.alert("No se ha podido reservar stock!: " + xhr.status + ': ' + xhr.statusText);			
+		});	
+
+		return reserva;		
+	}
+	
+	//Confirma la carga del pedido: credito Essen
+	function confirmarCarga(control)
+	{
+		//Deben existir articulos en el carrito
+		if (carrito.obtenerCantidadItems() < 1)
+		{
+			bootbox.alert("Al menos debes agregar un art&iacute;culo al carrito!");
+			return false;
+		}
+		
+		//Verifica contra Limite de Credito?
+		//Primero verifica si la nota valoriza
+		if ($("#ContentPlaceHolder1_hf_valoriza").val() == "1")
+		{	
+			
+			var montoTotal = $("#ContentPlaceHolder1_hf_montoCarrito").val();
+			var creditoEssen = $('#ContentPlaceHolder1_hf_limiteCredito').val().replace('.','');
+
+			//Verifica si va a superar su limite de credito
+			if (parseInt(creditoEssen) < parseInt(montoTotal))
+            {
+				bootbox.alert("No tiene cr&eacute;dito suficiente!");				
+				return false;				
+			}
+		}		
+		
+		//Confirmacion de carga
+		bootbox.confirm("&iquest;Confirma la carga del pedido?", function (result) {
+			if (result == true) {
+
+				Espere();
+				
+				//NO SE UTILIZA MAS LA RESERVA DE STOCK YA QUE NO SE VA A UTILIZAR LA OPCION DE PAGAR CON TARJETA
+				//SE VA A IMPLEMENTAR LINK DE PAGO: 202006
+				//RESERVA STOCK: en caso de no poder hacerlo, no permite realizar la operacion	
+				/*var reserva = reservarStock();
+				$("#ContentPlaceHolder1_reservaCodigo").val(reserva);
+		
+				if (reserva == "")
+					return false;*/
+				//FIN RESERVA STOCK
+		
+				//Rescates
+				$('#ContentPlaceHolder1_hf_planCanje_cantidad').val($("#cantidad_planCanje").val());
+				
+				//Guarda los productos cargados
+				$('#ContentPlaceHolder1_hf_productos').val(carrito.productos2JSON());		
+				$('#ContentPlaceHolder1_hf_planCanje_cantidad').val($("#cantidad_planCanje").val());	
+		
+				//Realiza la carga
+				__doPostBack(control, 'OnClick');
+				
+			}
+		});
+        
+		return false;      
+		
+	}

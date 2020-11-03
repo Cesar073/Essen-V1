@@ -1,0 +1,375 @@
+//Selecciona una nueva direccion de entrega
+function elegirDireccion(idDataDirecciones) {
+	
+	//Cambia la direccion elegida
+	$("#ContentPlaceHolder1_div_direccion").html(crearRegistroEnvio(idDataDirecciones, true));
+	
+	//Guarda en json la direccion elegida
+	$("#ContentPlaceHolder1_hf_direccionEntrega").val(JSON.stringify(dataDirecciones[idDataDirecciones]));
+
+	//Datos de localizacion
+	if (dataDirecciones[idDataDirecciones].geoLocalizado == "1") {
+		$("#ContentPlaceHolder1_hf_direccionLocalizar").val("gLat=" + dataDirecciones[idDataDirecciones].geoLatitud.replace(",", ".") + "&gLon=" + dataDirecciones[idDataDirecciones].geoLongitud.replace(",", "."));
+	}
+	else {
+		$("#ContentPlaceHolder1_hf_direccionLocalizar").val("dir=" + dataDirecciones[idDataDirecciones].direccion + " " + dataDirecciones[idDataDirecciones].nro + "," + dataDirecciones[idDataDirecciones].localidad + "," + dataDirecciones[idDataDirecciones].provincia + "," + dataDirecciones[idDataDirecciones].pais);
+	}
+
+	//Setea el flag indicando que va a una direccion propia
+	$("#ContentPlaceHolder1_hf_vaADireccionPropia").val("1");
+
+	$("#div_direccionesFavoritas").modal("hide");
+}
+
+//Crea el registro html de la direccion de entrega
+function crearRegistroEnvio(idDataDirecciones, solomostrar) {
+	
+	if (!solomostrar)
+		html = '<div class="row direccionSeleccionable" style = "cursor:pointer" onclick = "elegirDireccion(' + idDataDirecciones + ')">';
+	else
+		html = '<div class="row">';
+	
+	html += '<div class="col-md-10 col-xs-10 col-sm-10 col-lg-10 col-xs-offset-1 col-sm-offset-1" style="border:3px solid #4444 !important;">';	
+	html += '<div class="row" style="text-align:left; padding-top:1rem;">';
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">';
+	html += '<span class="font-grey-gallery">Direcci&oacuten: </span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].direccion + '&nbsp;' + dataDirecciones[idDataDirecciones].nro + '</span>';
+	html += '</div>';
+	html += '<div class="col-md-4 col-xs-12 col-sm-12" >';
+	html += '<span class="font-grey-gallery">Piso - Dpto: </span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].piso + '-' + dataDirecciones[idDataDirecciones].dpto + '</span>';
+	html += '</div>';
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">';
+	html += '<span class="font-grey-gallery">Entre Calles: </span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].entreCalles + ' y ' + dataDirecciones[idDataDirecciones].entreCalles2 + '</span>';
+	html += '</div>';
+	html += '</div>';
+	html += '<div class="row" style="text-align:left; padding-top:1rem;">';
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">'
+	html += '<span class="font-grey-gallery">C&oacute;digo Postal: </span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].codigoPostal + '</span>';
+	html += '</div>';
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">';
+	html += '<span class="font-grey-gallery">' + $("#ContentPlaceHolder1_hf_descLocalidad").val() + ':&nbsp;</span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].localidad + '</span>';
+	html += '</div>';
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">';
+	html += '<span class="font-grey-gallery">' + $("#ContentPlaceHolder1_hf_descProvincia").val() + ':&nbsp;</span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].provincia + '</span>';
+	html += '</div>';
+	html += '</div>';
+	html += '<div class="row" style="text-align:left; padding-top:1rem;">'
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">'
+	html += '<span class="font-grey-gallery">Tel&eacute;fono Contacto: </span><span class="font-grey-gallery">(' + dataDirecciones[idDataDirecciones].telefonoContactoArea + ')' + dataDirecciones[idDataDirecciones].telefonoContacto + '</span>';
+	html += '</div>';
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">';
+	
+	if (dataDirecciones[idDataDirecciones].entregarA != null)
+		html += '<span class="font-grey-gallery">Entregar A: </span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].entregarA + '</span>';
+	
+	html += '</div>';	
+	html += '<div class="col-md-4 col-xs-12 col-sm-12">';
+	
+	if (dataDirecciones[idDataDirecciones].email != null)
+		html += '<span class="font-grey-gallery">Email: </span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].email + '</span>';
+	
+	html += '</div>';
+	html += '</div>';
+	html += '<div class="row" style="text-align:left; padding-top:1rem;">'
+	html += '<div class="col-md-12 col-xs-12 col-sm-12">';
+	html += '<span class="font-grey-gallery">Observaciones: </span><span class="font-grey-gallery">' + dataDirecciones[idDataDirecciones].observaciones + '</span>';
+	html += '</div>';
+	html += '</div>';
+	html += '</div>';
+	html += '</div>';
+
+	return html;
+}
+
+//Permite cambiar la direccion de entrega
+function cambiarDireccion()
+{
+	$("#div_direccionesFavoritas").addClass("loading");
+
+	//Busca las direcciones de recepcion del usuario si todavia no lo hizo
+	$.ajax('../WebServices/DireccionesWS.asmx/obtenerDireccionesRecepcion', {
+		type: 'POST',
+		dataType: "json",
+		headers: {
+			"Accept": "*/*",
+			"Content-Type": "application/json; charset=utf-8",
+			"X-Requested-With": "XMLHttpRequest"
+		},
+		data: "{'cliente':'" + $("#ContentPlaceHolder1_hf_codigoCliente").val() + "'}"
+	}).done(function (data) {
+
+		if (data.d != "") {
+			var obj = jQuery.parseJSON(data.d);
+
+			//Guarda las direcciones obtenidas
+			dataDirecciones = obj;
+
+			html = "";
+
+			for (f = 0; f < obj.length; f++) {
+
+				html += crearRegistroEnvio(f, false);
+
+				$("#div_direccionesFavoritasBody").html(html);
+
+				//Muestra para elegir direcciones
+				$("#div_direccionesFavoritas").modal("show");
+			}
+		}
+		else {                    
+			bootbox.alert("No se recibieron datos de direcciones");
+		}
+
+		$("#div_direccionesFavoritas").removeClass("loading");
+	})
+	.fail(function () {
+		bootbox.alert("Hubo un error al ejecutar la funcion");
+		$("#div_direccionesFavoritas").removeClass("loading");
+	});            
+}
+
+//Muestra el formulario de nuevas direcciones
+function crearDireccion() {
+	$("#div_direccionesNuevas").modal("show");
+}
+
+//Abre la ventana para elegir la calle
+function ListarDirecciones(obj, op) {
+
+	var pais = $("#ContentPlaceHolder1_dd_recepcionpais").val();
+	var provincia = $("#ContentPlaceHolder1_dd_recepcionprovincia").val();
+	var partido = $("#ContentPlaceHolder1_dd_recepcionpartido").val();
+	var localidad = $("#ContentPlaceHolder1_dd_recepcionlocalidad").val();
+	var nro = $("#tb_recepcionnro").val();
+	var cp = "";
+
+	if (pais == "" || provincia == "" || partido == "" || localidad == "" || nro == "") {
+		bootbox.alert("Antes debe seleccionar Provincia, Partido, Localidad y N&uacute;mero de calle", function () { });
+		return false;
+	}
+	else if (!EsNumerico(nro)) {
+		bootbox.alert("El campo N&uacute;mero debe contener sólo n&uacute;meros", function () { });
+		return false;
+	}
+
+	if (op == 'CALLE') {
+		cp = "tb_recepcioncodpos";
+	}
+
+	popUp = window.open('../RegistroCliente/listadirecciones.aspx?o=' + op + '&objcalle=' + obj + '&objcp=' + cp + '&l=' + localidad + '&n=' + nro, '', 'toolbar=no,location=no,directories=no,menubar=no,resizable=no,status=no,scrollbars=yes,width=550,height=500,top=10,left=10');
+	popUp.focus();
+}
+
+//Valida los datos de la nueva direccion
+function validarNuevaDireccion() {
+
+	//Valida que todos los campos esten cargados				
+	var pool_point_id = "", supplier_id = "", dock_code_field = "", codigo_postal = $("#tb_recepcioncodpos").val();
+	
+	//Si no eligió datos, sale
+	if ($("#ContentPlaceHolder1_dd_recepcionpais").val() == "" || $("#ContentPlaceHolder1_dd_recepcionprovincia").val() == "" || $("#ContentPlaceHolder1_dd_recepcionpartido").val() == "" || $("#ContentPlaceHolder1_dd_recepcionlocalidad").val() == "") {
+		bootbox.alert("Por favor complete los campos obligatorios");
+		return false;		
+	}
+	
+	if ($("#tb_recepcionnro").val() == "" || $("#tb_recepciondireccion").val() == "" || $("#tb_recepciontelefonoarea").val() == "" || $("#tb_recepciontelefono").val() == "") {
+		bootbox.alert("Por favor complete los campos obligatorios");
+		return false;		
+	}
+	
+	//Si decidio poner email, debe ser correctos
+	if ($("#tb_recepcionemail").val() != "" || $("#tb_recepcionemail2").val() != "")
+	{
+		if ($("#tb_recepcionemail").val() != $("#tb_recepcionemail2").val())
+		{
+			bootbox.alert("Por favor verifique que el email sea correcto y debe coincidir");
+			return false;
+		}
+		else
+		{
+			//Comprueba el formato del email
+			if (!ValidateEmail($("#tb_recepcionemail").val())) 			
+			{
+				bootbox.alert("El formato de email es incorrecto");
+				return false;
+			}
+		}
+	}
+
+	//Verifica si es de Argentina, que sea entregable por Andreani
+	if ($("#ContentPlaceHolder1_dd_recepcionpais").val() == "1") {
+		var resp = verificarDatosAndreani($("#ContentPlaceHolder1_dd_recepcionlocalidad option:selected").text(), $("#tb_recepcioncodpos").val());
+
+		if (resp != null) {
+
+			//Valida la respuesta
+			if (resp.codigoRetorno == "0") {
+
+				//No hay valores
+				if (resp.plazaDistribuidora == "") {
+					bootbox.alert("No es posible entregar en esa direcci&oacute;n. Por favor verifique los datos o intente en otra direcci&oacute;n");
+					return false;
+				}
+				else {
+					pool_point_id = resp.plazaDistribuidora;
+					supplier_id = resp.zonaReparto;
+					dock_code_field = resp.sector;
+				}
+
+			}
+			else {
+				bootbox.alert("verificarDatosAndreani:Error al ejecutar la funcion: " + resp.error);
+				return false;
+			}
+		}
+		else {
+			bootbox.alert("verificarDatosAndreani: No hubo respuesta, por favor intente mas tarde");
+			return false;
+		}
+	}
+	
+	//Verifica si es de Peru, UBIGEO y tiempo de entrega
+	if ($("#ContentPlaceHolder1_dd_recepcionpais").val() == "5") {
+		
+		if ($("#tb_recepciondocumento").val() == "")
+		{		
+			bootbox.alert("Debe completar el campo documento");
+			return false;
+		}		
+		
+		if (!EsNumerico($("#tb_recepciondocumento").val()))
+		{		
+			bootbox.alert("El campo Documento debe contener sólo n&uacute;meros");
+			return false;
+		}
+		
+		var resp = verificarDatosUBIGEO($("#ContentPlaceHolder1_dd_recepcionlocalidad option:selected").val());
+
+		if (resp != null) {
+
+			//Valida la respuesta
+			if (resp.codigoRetorno == "0") {
+
+				//No hay valores
+				if (resp.ubigeo == "") {
+					codigo_postal = "";
+					bootbox.alert("No es posible entregar en esa direcci&oacute;n. Por favor verifique los datos o intente en otra direcci&oacute;n");
+					return false;
+				}
+				else {
+					codigo_postal = resp.ubigeo;
+					pool_point_id = resp.ubigeo;
+					supplier_id = '';
+					dock_code_field = resp.lt;
+				}
+
+			}
+			else {
+				bootbox.alert("verificarDatosUBIGEO: Error al ejecutar la funcion: " + resp.error);
+				return false;
+			}
+		}
+		else {
+			bootbox.alert("verificarDatosUBIGEO: No hubo respuesta, por favor intente mas tarde");
+			return false;
+		}
+	}
+
+	//Cambia la nueva direccion: la carga en el array existente y la elige           
+	var direccionNueva = {};
+	direccionNueva.numero = "0";
+	direccionNueva.pais = $("#ContentPlaceHolder1_dd_recepcionpais option:selected").text(); direccionNueva.paisId = $("#ContentPlaceHolder1_dd_recepcionpais").val();
+	direccionNueva.provincia = $("#ContentPlaceHolder1_dd_recepcionprovincia option:selected").text(); direccionNueva.provinciaId = $("#ContentPlaceHolder1_dd_recepcionprovincia").val();
+	direccionNueva.partido = $("#ContentPlaceHolder1_dd_recepcionpartido option:selected").text(); direccionNueva.localidad = $("#ContentPlaceHolder1_dd_recepcionlocalidad option:selected").text();
+	direccionNueva.barrio = $("#tb_recepcionbarrio").val(); direccionNueva.nro = $("#tb_recepcionnro").val(); direccionNueva.piso = $("#tb_recepcionpiso").val(); direccionNueva.dpto = $("#tb_recepciondpto").val();
+	direccionNueva.entreCalles = $("#tb_recepcionentrecalles").val(); direccionNueva.entreCalles2 = $("#tb_recepcionentrecalles2").val();
+	direccionNueva.codigoPostal = codigo_postal; direccionNueva.entregarA = $("#tb_recepcionentregara").val();
+	direccionNueva.observaciones = $("#tb_recepcionobservaciones").val();
+	direccionNueva.telefonoContactoArea = $("#tb_recepciontelefonoarea").val(); direccionNueva.telefonoContacto = $("#tb_recepciontelefono").val();
+	direccionNueva.cultura = ""; direccionNueva.activa = false; direccionNueva.direccion = $("#tb_recepciondireccion").val();
+	direccionNueva.geoLocalizado = "0"; direccionNueva.geoLatitud = ""; direccionNueva.geoLongitud = "";
+	direccionNueva.email = $("#tb_recepcionemail").val(); direccionNueva.documento = $("#tb_recepciondocumento").val(); 
+	direccionNueva.POOL_POINT_ID = pool_point_id; direccionNueva.SUPPLIER_ID = supplier_id; direccionNueva.DOCK_CODE_FIELD = dock_code_field;
+
+	dataDirecciones.push(direccionNueva);
+      
+	var idNuevo = dataDirecciones.length - 1;
+	
+	//Setea el flag indicando que no va a una direccion propia
+	$("#ContentPlaceHolder1_hf_vaADireccionPropia").val("0");
+	
+	elegirDireccion(idNuevo);	
+
+	$("#div_direccionesNuevas").modal("hide");
+}
+
+//Verifica si los datos de cabecera y zona son correctos
+//recibe localidad y codigo postal (solo la parte numerica)
+//Devuelve un objeto con la respuesta
+//(Solo para Argentina)
+function verificarDatosAndreani(localidad, codigoPostal) {
+
+	Espere();
+
+	var devolucion = {};
+
+	$.ajax('../WebServices/DireccionesWS.asmx/verificarRepartoLogisticaAndreani', {
+		async: false,
+		type: 'POST',
+		dataType: "json",
+		headers: {
+			"Accept": "*/*",
+			"Content-Type": "application/json; charset=utf-8",
+			"X-Requested-With": "XMLHttpRequest"
+		},
+		beforeSend: function (hr) {
+			hr.setRequestHeader("TicketWS", ticketWS);
+		},
+		data: "{'localidad':'" + localidad + "','codigoPostal':'" + codigoPostal + "'}"
+	}).done(function (data) {
+
+		devolucion = JSON.parse(data.d);                
+		waitingDialog.hide();                
+
+	})
+	.fail(function () {
+		waitingDialog.hide();                
+		bootbox.alert("No se ha podido verificar la direccion con Andreani!");
+	});	
+
+	return devolucion;
+}
+
+//Solo Perú: Verifica el codigo de UBIGEO (Dinet) para el id de localidad recibido
+//Devuelve un objeto con la respuesta
+function verificarDatosUBIGEO(localidadId) {
+
+	Espere();
+
+	var devolucion = {};
+
+	$.ajax('../WebServices/DireccionesWS.asmx/verificarUBIGEO', {
+		async: false,
+		type: 'POST',
+		dataType: "json",
+		headers: {
+			"Accept": "*/*",
+			"Content-Type": "application/json; charset=utf-8",
+			"X-Requested-With": "XMLHttpRequest"
+		},
+		beforeSend: function (hr) {
+			hr.setRequestHeader("TicketWS", ticketWS);
+		},
+		data: "{'localidadId':" + localidadId + "}"
+	}).done(function (data) {
+
+		devolucion = JSON.parse(data.d);                
+		waitingDialog.hide();                
+
+	})
+	.fail(function () {
+		waitingDialog.hide();                
+		bootbox.alert("No se ha podido verificar los datos de UBIGEO!");
+	});	
+
+	return devolucion;
+}

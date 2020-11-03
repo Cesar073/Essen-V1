@@ -1,0 +1,571 @@
+//Al cargar la pagina
+window.onload = function () {
+
+	//Inicializa MP
+	Mercadopago.setPublishableKey($("#ContentPlaceHolder1_hf_MP_publicKey").val());
+
+	//Moneda codigo
+	$("#tb_moneda_codigo").val($("#ContentPlaceHolder1_hf_monedaCodigo").val());
+
+	//Completa los tipos de documento
+	completarTiposDocumento();
+
+	//Verifica la tarjeta al salir del campo tarjeta
+	$("#cardnumber").change(function () {
+		verificarTarjeta();
+	});
+
+	//Selecciona las cuotas disponibles segun el issuer seleccionado
+	$("#dd_banco").change(function () {
+		completarCuotas();
+	});
+
+	//guarda los datos ante un cambio de cuota
+	$("#dd_cuotas").change(function () {
+		completarDatosCuotas();
+	});
+	
+	//guarda los datos ante un cambio de cuota
+	$("#tb_monto").change(function () {
+		verificarTarjeta();
+	});	
+	
+	//Verifica pago minimo
+	$("#tb_monto").blur(function() {
+		if (parseInt($("#tb_monto").val()) < parseInt($('#ContentPlaceHolder1_hf_pagoMinimo').val()))
+		{
+			bootbox.alert("El pago minimo debe ser de: " + $("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles($('#ContentPlaceHolder1_hf_pagoMinimo').val()));
+			return false;
+		}
+	});
+}
+
+//Obtiene los tipos de documento y completa el drop
+function completarTiposDocumento() {
+	//Intenta obtener los tipos de documento
+
+	Mercadopago.getIdentificationTypes(identificationHandler);
+}
+
+//Handler para tipos de documento
+function identificationHandler(status, obj) {
+	//Limpia el array de tipos de documento
+	tiposDocumento = [];
+
+	if (status != "200") {
+        waitingDialog.hide();
+
+
+        $("#Com_Tarj").css("display", "block");
+        document.getElementById('span_Al').innerHTML = "Ha ocurrido un error de comunicacion con MercadoPago. Por favor intente mas tarde";
+        $("#Com_Tarj").modal("show");
+
+		
+		return false;
+	}
+
+	//Limpia los tipos de documento
+	$("#dd_tipoDocumento").empty();
+
+	//guarda los tipos de documento y sus propiedades
+	for (var f = 0; f < obj.length; f++) {
+		tiposDocumento.push({ id: obj[f].id, min_length: obj[f].min_length, max_length: obj[f].max_length });
+		jQuery('<option/>', {
+			value: obj[f].id,
+			text: obj[f].id.toUpperCase()
+		}).appendTo('#dd_tipoDocumento');
+	}
+
+	waitingDialog.hide();
+}
+
+//Verifica la tarjeta
+function verificarTarjeta() {
+
+	var cardValor = $("#cardnumber").val();
+
+	///Debe tener como minimo el bin
+	if (cardValor.length < 6)
+		return;
+
+	//Intenta obtener el medio de pago
+	
+	object = { "bin": cardValor.substr(0, 6) };
+	Mercadopago.getPaymentMethod(object, paymentMethodHandler);
+}
+
+//Handler para medio de pago
+function paymentMethodHandler(status, obj) {
+
+	$("#hf_val_medioPago").val("");
+	$("#img_mediopago").attr("src", "");
+
+	if (status != "200") {
+        waitingDialog.hide();
+       
+        $("#Com_Tarj").css("display", "block");
+        document.getElementById('span_Al').innerHTML = "Ha ocurrido un error de comunicacion con MercadoPago (" + status + "). Por favor intente mas tarde";
+        $("#Com_Tarj").modal("show");
+
+	          
+		return false;
+	}
+
+	//guarda el medio de pago y sus propiedades
+	$("#hf_val_medioPago").val(obj[0].id);
+
+	$("#hf_val_card_number_length").val(obj[0].settings[0].card_number.length);
+	$("#hf_val_card_ccv_length").val(obj[0].settings[0].security_code.length);
+
+	//Imagen del medio de pago
+	$("#img_mediopago").attr("src", obj[0].secure_thumbnail);
+
+	//Debe existir un monto para obtener las cuotas
+	if ($("#tb_monto").val() == "") {
+		waitingDialog.hide();
+		//bootbox.alert("El monto no es válido");
+		return false;
+	}
+
+	//Intenta obtener las cuotas disponibles
+	var cardValor = $("#cardnumber").val();
+
+	///Debe tener como minimo el bin
+	if (cardValor.length < 6)
+		return;
+
+	var monto = parseFloat($("#tb_monto").val() + "." + $("#tb_decimales").val());
+	Mercadopago.getInstallments({ "bin": cardValor.substr(0, 6), "amount": monto }, installmentHandler);
+}
+
+//Handler para medio de pago
+function issuersHandler(status, obj) {
+	if (status != "200") {
+        waitingDialog.hide();
+
+        $("#Com_Tarj").css("display", "block");
+        document.getElementById('span_Al').innerHTML = "Ha ocurrido un error de comunicacion con MercadoPago. Por favor intente mas tarde";
+        $("#Com_Tarj").modal("show");
+
+		
+		return false;
+	}
+
+	waitingDialog.hide();
+}
+
+//Handler para medio de pago
+function installmentHandler(status, obj) {
+	if (status != "200") {
+        waitingDialog.hide();
+
+        $("#Com_Tarj").css("display", "block");
+        document.getElementById('span_Al').innerHTML = "Ha ocurrido un error de comunicacion con MercadoPago. Por favor intente mas tarde";
+        $("#Com_Tarj").modal("show");
+
+		return false;
+	}
+
+	//Completa el drop de issuers
+	completarIssuers(obj);
+
+	waitingDialog.hide();
+}
+
+//Obtiene los issuers y completa el drop
+function completarIssuers(datos) {
+	
+	//Limpia el array de issuers
+	issuers = [];           
+
+	for (var f = 0; f < datos.length; f++) {
+		//guarda los issuers
+		if (!existeIssuer(datos[f].issuer.id, issuers))
+			issuers.push({ id: datos[f].issuer.id, name: datos[f].issuer.name });
+	}
+
+	$("#dd_banco").empty();
+
+	for (var f = 0; f < issuers.length; f++) {
+		jQuery('<option/>', {
+			value: issuers[f].id,
+			text: issuers[f].name
+		}).appendTo('#dd_banco');
+	}
+
+	//completa las cuotas del issuer por defecto
+	completarCuotas();
+}
+
+//Devuelve true si existe un issuer en el array
+function existeIssuer(id, arr) {
+	var existe = false;
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i].id == id) {
+			existe = true;
+			break;
+		}
+	}
+
+	return existe;
+}
+
+//Completa las cuotas segun el issuer seleccionado
+function completarCuotas() {	
+
+	//Limpia el array de cuotas
+	cuotas = [];
+
+	//Guarda el issuer actual	
+	$("#ContentPlaceHolder1_hf_form_issuer").val($("#dd_banco").val());
+	$("#ContentPlaceHolder1_hf_form_issuer_name").val($("#dd_banco option:selected").text());
+
+	//Limpia las cuotas existentes
+	$("#dd_cuotas").empty();
+
+	//Intenta obtener las cuotas disponibles
+	var cardValor = $("#cardnumber").val();
+
+	$.ajax('../WebServices/MPWS.asmx/ObtenerCuotasWeb', {
+		type: 'POST',
+		dataType: "json",
+		headers: {
+			"Accept": "*/*",
+			"Content-Type": "application/json; charset=utf-8",
+			"X-Requested-With": "XMLHttpRequest"
+		},
+		data: "{'ticket':'" + ticketWS + "','bin':'" + cardValor.substr(0, 6) + "','issuerId':'" + $("#dd_banco").val() + "','paisId': " + $("#ContentPlaceHolder1_hf_paisId").val() + ", 'cliente':'" + usuarioCodigo + "','monto':'" + $("#tb_monto").val() + "." + $("#tb_decimales").val() + "','operacion':''}"                
+	}).done(function (data) {
+
+		if (data.d != "") {
+			var obj = jQuery.parseJSON(data.d);
+		
+			for (f = 0; f < obj.length; f++) {
+				//Guarda las cuotas                        
+				cuotas.push({ installments: obj[f].installments, processing_mode: obj[f].processing_mode, merchant_account_id: obj[f].merchant_account_id, payment_method_id: obj[f].payment_method_id, payment_method_option_id: obj[f].payment_method_option_id, aggregator_sin_interes: obj[f].aggregator_sin_interes });
+
+				jQuery('<option/>', {
+					value: obj[f].installments,
+					text: obj[f].recommended_message
+				}).appendTo('#dd_cuotas');
+			}
+
+			completarDatosCuotas();
+		}
+        else {
+			bootbox.alert("No se recibieron datos de cuotas");            
+		}
+
+		waitingDialog.hide();
+	})            
+	.fail(function () {
+		bootbox.alert("Hubo un error al ejecutar la funcion");
+		waitingDialog.hide();
+	});
+
+}
+
+//Ante un cambio de cuotas, completa los datos
+function completarDatosCuotas() {
+	for (var f = 0; f < cuotas.length; f++) {
+
+		if (cuotas[f].installments == $("#dd_cuotas").val()) {
+			$("#ContentPlaceHolder1_hf_form_cuotas").val(cuotas[f].installments);
+			$("#ContentPlaceHolder1_hf_form_processingMode").val(cuotas[f].processing_mode);
+			$("#ContentPlaceHolder1_hf_form_merchantAccountId").val(cuotas[f].merchant_account_id);
+			$("#ContentPlaceHolder1_hf_form_payment_method_id").val(cuotas[f].payment_method_id);
+			$("#ContentPlaceHolder1_hf_form_payment_method_option_id").val(cuotas[f].payment_method_option_id);
+			$("#ContentPlaceHolder1_hf_form_aggregator_sin_interes").val(cuotas[f].aggregator_sin_interes);
+			
+			break;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+//Es alfabetico?
+function isAlfa(evt) {
+
+	evt = (evt) ? evt : window.event;
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	if (charCode == 39 && charCode > 32 && (charCode < 65 || charCode > 90) && (charCode < 97 || charCode > 122)) {
+		return false;
+	}
+	return true;
+}
+
+//Convierte a mayusculas
+function toTitleCase(str) {
+	return str.replace(/\w\S*/g, function (txt) {
+		return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+	});
+}
+
+//Completa nombre y apellido
+function cambiarapellido(apellido) {
+	$t = $(apellido);
+	$name = $('#tb_nombre');
+	$('.creditcardbox .cardholder div').html($t.val() + ' ' + $name.val());
+}
+
+//Solo deja ingresar numeros
+function soloNumero(e) {
+
+	var unicode = e.charCode ? e.charCode : e.keyCode;
+	if (unicode >= 48 && unicode <= 57) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+//Valida la direccion de email
+function ValidateEmail(mail) {
+
+	if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
+		return true;
+	}
+
+	return false;
+}
+
+//Verifica el documento ingresado
+function comprobarDocumento() {
+	var min, max;
+
+	for (f = 0; f < tiposDocumento.length; f++) {
+		if (tiposDocumento[f].id == $("#dd_tipoDocumento").val()) {
+			min = tiposDocumento[f].min_length;
+			max = tiposDocumento[f].max_length;
+			break;
+		}
+	}
+
+	if ($("#tb_documento").val().length < min)
+		return false;
+
+	if ($("#tb_documento").val().length > max)
+		return false;
+
+	return true;
+}
+
+//Verifica que este completo el formulario
+function validarFormulario() {
+
+	var valido = true;
+	
+	//Deben existir articulos en el carrito
+	if (carrito.obtenerCantidadItems() < 1)
+	{
+		valido = false;
+		bootbox.alert("Al menos debes agregar un art&iacute;culo al carrito!");
+		return false;
+	}
+
+	//Comprueba tarjeta
+	if ($("#cardnumber").val().length != parseInt($("#hf_val_card_number_length").val())) {
+		valido = false;
+		bootbox.alert("Por favor compruebe el numero de la tarjeta");        
+		return false;
+	}
+
+	if ($("#cardccv2").val().length != parseInt($("#hf_val_card_ccv_length").val())) {
+		valido = false;
+		bootbox.alert("Por favor compruebe que el codigo de seguridad sea correcto");		
+		return false;
+	}
+
+	//Verifica monto
+	if ($("#tb_monto").val() == '' || $("#tb_decimales").val() == '' || $("#tb_monto").val() == 0) {
+		valido = false; 
+		bootbox.alert("El monto es incorrecto");
+		return false;
+	}
+	
+	//Pago minimo
+	if (parseInt($("#tb_monto").val()) < parseInt($('#ContentPlaceHolder1_hf_pagoMinimo').val()))
+	{
+		bootbox.alert("El pago minimo debe ser de: " + $("#ContentPlaceHolder1_hf_monedaCodigo").val() + " " + separadorMiles($('#ContentPlaceHolder1_hf_pagoMinimo').val()));
+		$("#tb_monto").val($('#ContentPlaceHolder1_hf_pagoMinimo').val());
+		return false;
+	}
+
+	//Cuotas            
+	if ($("#dd_cuotas").val() == "-1") {
+		valido = false;
+		bootbox.alert("Por favor completa la cantidad de cuotas");
+		return false;
+	}
+
+	//Nombre y apellido
+	if ($("#tb_nombre").val() == '' || $("#tb_apellido").val() == '') {
+		valido = false;
+		bootbox.alert("Debes completar el nombre y apellido");		
+		return false;
+	}
+
+	//Documento
+	if (!comprobarDocumento()) {
+		valido = false;
+		bootbox.alert("Por favor compruebe el numero de documento");
+		return false;
+	}
+
+	//Telefono
+	if ($("#tb_area").val() == '' || $("#tb_telefono").val() == '') {
+		valido = false;
+		bootbox.alert("Debes Ingresar cod. de Area y telefono");		
+		return false;
+	}
+
+	//Email
+	if ($("#tb_email").val() == '') {
+		valido = false;
+		bootbox.alert("Debes Ingresar el email");		
+		return false;
+	}
+
+	if (!ValidateEmail($("#tb_email").val())) {
+		valido = false;
+		bootbox.alert("Debes Ingresar un email v&aacute;lido");		
+		return false;
+	}
+
+    if (valido) {
+
+		bootbox.confirm("&iquest;Confirma realizar la operacion y cargar el pedido?", function (result) {
+			if (result == true) {
+				Espere();				
+				Mercadopago.createToken(form_MP, tokenHandler);
+			}
+		});
+	}
+
+	return valido;
+}
+
+//Recibe el token de MP y prepara el pago
+function tokenHandler(status, response) {
+	
+	waitingDialog.hide();
+
+	if (status != "200") {
+		//Verifica errores de parametros
+		if (status == "400") {
+			//Error en algun dato
+			if (response.cause != null) {
+				var codigoError = response.cause[0].code;
+
+				//Obtiene la descripcion del error
+				$.ajax('../WebServices/MPWS.asmx/obtenerMensajeError', {
+					type: 'POST',
+					dataType: "json",
+					headers: {
+						"Accept": "*/*",
+						"Content-Type": "application/json; charset=utf-8",
+						"X-Requested-With": "XMLHttpRequest"
+					},
+					data: "{'codigoError':'" + codigoError + "'}"
+				}).done(function (data) {
+
+					bootbox.alert(data.d);
+					waitingDialog.hide();
+				})
+                    .fail(function () {
+
+						bootbox.alert("Existe un error no determinado en alguno de los datos ingresados (" + codigoError + "). Por favor revise bien el formulario y vuelva a intentarlo");
+						waitingDialog.hide();
+				});
+			}
+            else {
+				bootbox.alert("Existe un error no determinado en alguno de los datos ingresados. Por favor revise bien el formulario y vuelva a intentarlo");                
+			}
+
+			return false;
+		}
+        else {
+			bootbox.alert("Ha ocurrido un error de comunicacion con MercadoPago(" + status + ").Por favor intente mas tarde");			
+			return false;
+		}
+
+		return false;
+	}
+
+	//RESERVA STOCK: en caso de no poder hacerlo, no permite realizar la operacion	
+	var reserva = reservarStock();
+	$("#ContentPlaceHolder1_reservaCodigo").val(reserva);		
+	if (reserva == "")
+		return false;	
+	//FIN RESERVA STOCK
+
+	//Guarda el card token
+	$("#ContentPlaceHolder1_hf_cardToken").val(response.id);
+	
+	//Completa los valores que iran al server
+	$("#ContentPlaceHolder1_hf_form_nombre").val($("#tb_nombre").val());
+	$("#ContentPlaceHolder1_hf_form_apellido").val($("#tb_apellido").val());
+	$("#ContentPlaceHolder1_hf_form_documento").val($("#tb_documento").val());
+	$("#ContentPlaceHolder1_hf_form_tipoDocumento").val($("#dd_tipoDocumento").val());
+	$("#ContentPlaceHolder1_hf_form_area").val($("#tb_area").val());
+	$("#ContentPlaceHolder1_hf_form_telefono").val($("#tb_telefono").val());
+	$("#ContentPlaceHolder1_hf_form_email").val($("#tb_email").val());
+
+	$("#ContentPlaceHolder1_hf_form_cuotas").val($("#dd_cuotas").val());
+	$("#ContentPlaceHolder1_hf_form_medioPago").val($("#hf_val_medioPago").val());
+
+	$("#ContentPlaceHolder1_hf_form_monto").val($("#tb_monto").val());
+	$("#ContentPlaceHolder1_hf_form_decimales").val($("#tb_decimales").val());	
+	
+	//prepara los datos en json
+	var datos = '{"paisId":1,"codigoUsuario":"' + $("#ContentPlaceHolder1_hf_codigoCliente").val() + '","monto":' + $("#tb_monto").val() + "." + $("#tb_decimales").val() + ',"nombre":"' + $("#tb_nombre").val() + '","apellido":"' + $("#tb_apellido").val() + '","email":"' + $("#tb_email").val() + '",';
+	datos += '"telefonoArea":"' + $("#tb_area").val() + '","telefonoNumero":"' + $("#tb_telefono").val() + '","documentoTipo":"' + $("#dd_tipoDocumento").val() + '","documentoNumero":"' + $("#tb_documento").val() + '",';
+	datos += '"cardToken":"' + response.id + '","aggregator_sin_interes":"' + $("#ContentPlaceHolder1_hf_form_aggregator_sin_interes").val() + '","cuotas":' + $("#dd_cuotas").val() + ',"processing_mode":"' + $("#ContentPlaceHolder1_hf_form_processingMode").val() + '",';
+	datos += '"merchant_account_id":"' + $("#ContentPlaceHolder1_hf_form_merchantAccountId").val() + '","payment_method_id":"' + $("#ContentPlaceHolder1_hf_form_payment_method_id").val()+ '","payment_method_option_id":"' + $("#ContentPlaceHolder1_hf_form_payment_method_option_id").val() + '",';
+	datos += '"medioPago":"' + $("#ContentPlaceHolder1_hf_form_medioPago").val() + '","issuer":"' + $("#ContentPlaceHolder1_hf_form_issuer").val() + '","issuer_name":"' + $("#ContentPlaceHolder1_hf_form_issuer_name").val() + '"}';
+	
+	//Llama a pagar
+	$.ajax('../WebServices/MPWS.asmx/pagar', {
+		type: 'POST',
+		dataType: "json",
+		headers: {
+			"Accept": "*/*",
+			"Content-Type": "application/json; charset=utf-8",
+			"X-Requested-With": "XMLHttpRequest"
+		},
+		data: "{'strDatos':'" + datos + "'}"
+	}).done(function (data) {
+
+		if (data.d != "") {
+			
+			var obj = jQuery.parseJSON(data.d);
+			
+			$("#ContentPlaceHolder1_hf_tc_operador").val("MercadoPago");
+			$("#ContentPlaceHolder1_hf_tc_transaccion").val(obj.transaccion);
+			
+			//Si el resultado fue positivo, realiza la carga del pedido, si no, muestra el error
+			if (obj.codigo == "approved")
+				__doPostBack('ctl00$ContentPlaceHolder1$b_confirmarCargaTarjeta', 'OnClick');
+			else
+            {
+				bootbox.alert("Error : " + obj.mensaje);            
+                waitingDialog.hide();
+				return false;				
+			}
+		}
+        else 
+		{
+			bootbox.alert("No se recibieron datos de cuotas");            
+		}
+
+		waitingDialog.hide();
+	})            
+        .fail(function () {
+            bootbox.alert("Hubo un error al intentar pagar");
+			waitingDialog.hide();
+	   });
+	
+	return false;
+}

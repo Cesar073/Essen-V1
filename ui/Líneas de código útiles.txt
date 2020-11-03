@@ -1,0 +1,29 @@
+PARA TRANSFORMAR UN ARCHIVO CREADO POR QTDESIGNER A PYTHON, ES DECIR, DE .UI A .PY
+ESTE COMANDO SE EJECUTA DESDE LA CONSOLA DEL SISTEMA, UBICANDONOS EN LA CARPETA DONDE TENEMOS EL ARCHIVO A TRANSFORMAR
+LUEGO CAMBIAMOS LOS VALORES DE INPUT Y OUTPUT SEGÚN CORRESPONDA
+
+PYQT4
+python.exe -m PyQt4.uic.pyuic input.ui -o output.py
+
+PYQT5
+python -m PyQt5.uic.pyuic input.ui -o output.py
+
+PYSIDE2
+pyside2-uic input.ui -o output.py
+
+
+pyside2-uic VtnaBuscar.ui -o vtn_busc.py
+pyside2-uic VtnaClientes.ui -o vtn_clie.py
+pyside2-uic VtnaClieNuevo.ui -o vtn_cli_nue.py
+
+pyside2-uic VtnaConfig.ui -o vtn_conf.py
+pyside2-uic VtnaImagenes.ui -o vtn_imag.py
+pyside2-uic VtnaProd.ui -o vtn_prod.py
+
+pyside2-uic VtnaProm.ui -o vtn_prom.py
+pyside2-uic VtnaStockinter.ui -o vtn_stoc.py
+pyside2-uic VtnaVentas.ui -o vtn_vent.py
+
+
+
+

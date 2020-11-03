@@ -1,0 +1,23 @@
+.text-large {
+    font-size:18px !important;
+}
+.text-medium {
+    font-size:14px;
+    font-weight:bold;
+}
+.text-small {
+    font-size:12px;
+    font-weight:100;
+}
+.margen {
+    margin-top: 7px;
+}
+.icono-essenmobile {
+    margin-top: -5px;
+    margin-left: -5px;
+}
+@media (max-width: 768px) {
+    .hide-too-small {
+        display:none;
+    }
+}

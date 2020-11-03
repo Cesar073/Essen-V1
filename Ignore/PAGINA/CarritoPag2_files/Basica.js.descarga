@@ -1,0 +1,132 @@
+﻿//Ejecuta un post y ejecuta el successFunction sobre el resultado
+//La funcione es definida por el usuario.
+function ajaxPost(wsURL, isAsync, params, ticket, successFunction) {
+    var resp = false;
+
+    $.ajax({
+        url: wsURL,
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: isAsync,
+        data: params,
+        beforeSend: function (hr) {
+            hr.setRequestHeader("TicketWS", ticket);
+        },
+        success: function (response) {
+            if (successFunction)
+                resp = successFunction(response);
+            else
+                resp = response;
+        },
+        error: function (repo) {
+            console.log(repo);
+        }
+    });
+
+    return resp;
+
+}
+
+//Devuelve el cuit asociado a la situacion fiscal seleccionada
+//Puede ser: '23000000000', '' (vacio) o 'D' (documento)
+function obtenerCuitAsociado(paisId, opcionSeleccionada) {
+    var cuit = "";
+
+    if (paisId == 1) {
+        if (opcionSeleccionada == 'NC') 
+            cuit = '23000000000';
+    }
+    else if (paisId == 2 || paisId == 3) {
+        if (opcionSeleccionada == 'NI')
+            cuit = 'D';
+    }
+    else {
+            cuit = "";
+    }
+
+    return cuit;
+}
+
+//Verifica si el texto puede convertirse en numero
+function EsNumerico(texto) {
+	if (!/^([1-9][0-9]*)*$/.test(texto))
+		return false;
+	else
+		return true;
+}
+
+//Limita la entrada a caracteres alfanumericos. No permite ciertos caracteres especiales
+function noEspeciales(evt) {
+
+	evt = (evt) ? evt : window.event;
+	var charCode = (evt.which) ? evt.which : evt.keyCode;
+	
+	if (charCode < 32 || charCode == 34 || charCode == 37 || charCode == 39 || charCode == 44 || (charCode >= 91 && charCode <= 96) || (charCode >= 123 && charCode <= 163) || (charCode >= 166 && charCode <= 208) || (charCode >= 210 && charCode <= 240) || charCode > 241) {
+		return false;
+	}
+	return true;
+}
+
+ //Limita la entrada de numeros solamente
+function soloNumero(e)
+{        
+	var unicode = e.charCode ? e.charCode : e.keyCode;
+	if (unicode >= 48 && unicode <= 57) 
+		return true;            
+	else 
+		return false;            
+}
+
+ //Limita la entrada de numeros y coma decimal solamente
+function soloNumeroYDecimales(e)
+{        
+	var unicode = e.charCode ? e.charCode : e.keyCode;
+	if ((unicode >= 48 && unicode <= 57) || unicode == 44)
+		return true;            
+	else 
+		return false;            
+}
+
+//Muestra el cartel de "Espere"
+function Espere() {
+    waitingDialog.show('Por favor espere...', { dialogSize: 'sm', progressType: 'warning' });
+    return true;
+}
+
+//Oculta el cartel de "Espere"
+function FinEspere() {
+    waitingDialog.hide();
+    return true;
+}
+
+///Formatea un numero
+function FormatearCantidad(nStr) {
+
+	nStr += '';
+	x = nStr.split('.');
+	x1 = x[0];
+
+	x2 = x.length > 1 ? ',' + x[1] : '';
+	var rgx = /(\d+)(\d{3})/;
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + '.' + '$2');
+	}
+
+
+	return x1 + x2;
+}
+
+//Reemplaza tildes en textos
+function reemplazarAcentos(cadena) {
+	var chars = {
+		"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+		"à": "a", "è": "e", "ì": "i", "ò": "o", "ù": "u", "ñ": "n",
+		"Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U",
+		"À": "A", "È": "E", "Ì": "I", "Ò": "O", "Ù": "U", "Ñ": "N"
+	}
+	var expr = /[áàéèíìóòúùñ]/ig;
+	var res = cadena.replace(expr, function (e) { return chars[e] });
+	return res;
+
+}//fin reemplazarAcentos

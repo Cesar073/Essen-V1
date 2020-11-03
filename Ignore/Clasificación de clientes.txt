@@ -1,0 +1,20 @@
+CLASIFICACIÓN DE CLIENTES
+
+Los clientes tendrán una clasificación dentro del sistema y ésta va a ir variando, así que por
+momento sólo le ponemos un número entero y tendrán un valor según la siguiente tabla:
+
+Partimos de la base que si tenemos el contacto de algún cliente es porque están interesados en las
+piezas de Essen. Por ende, los puntajes no tienen relación con la posibilidad de que estén interesados
+sino con la de poder comprar.
+0= No se sabe, fue agendado pero no tenemos idea del tipo de cliente
+1= Comentario negativo público en Face u otros medios
+2= No piensa comprar nada por sus precios
+3= Le interesó pero no compró. No manifestó causa
+4= Quiere comprar pero no pudo por alguna causa
+5= Compra pero de recursos limitados, se le ofrecerá en medida que vaya terminando de pagar lo que compró
+6= Compra combos chicos
+7= Compra combos grandes
+8= No existe todavía, cliente sin problemas que compra lo que sea XD
+
+En caso de que en el futuro se modifique dicha tabla, deberemos actualizar con alguna función
+los datos que están almacenados en la base de datos de clientes
