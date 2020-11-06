@@ -9,7 +9,7 @@
 
 '''
 
-from PySide2.QtWidgets import QDialog, QMessageBox, QFileDialog
+from PySide2.QtWidgets import QMainWindow, QMessageBox, QFileDialog
 # Módulos generales
 import os
 from os import walk
@@ -28,7 +28,7 @@ import mod.vars as mi_vars
 
 AUTOM_ACT = 0
 
-class V_Productos(QDialog):
+class V_Productos(QMainWindow):
 
     '''########################################################################################################################################
     ###########################################################################################################################################

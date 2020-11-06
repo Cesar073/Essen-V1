@@ -4,11 +4,11 @@ naranja tiene unas promos, si es del hipotecario otras, y así sucesivamente. In
 3: Visa-Hipotecario, etc... Así puedo tener cientos de formas de pago y en la base de datos del cliente sólo agendo un integer
 '''
 
-from PySide2.QtWidgets import QDialog
+from PySide2.QtWidgets import QMainWindow
 from vtn.vtn_clie import Ui_Cliente_BD
 from vtn.cla_clie_nue import V_ClienteNuevo
 
-class V_Clientes(QDialog):
+class V_Clientes(QMainWindow):
     def __init__(self, VentanaAnterior):
         super(V_Clientes, self).__init__()
         self.ui = Ui_Cliente_BD()

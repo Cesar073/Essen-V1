@@ -1,7 +1,7 @@
 # * Botón de sugerir regalos
 # * Que se vean los puntos que se generan con un combo
 
-from PySide2.QtWidgets import QDialog, QMessageBox, QFileDialog, QInputDialog
+from PySide2.QtWidgets import QMainWindow, QMessageBox, QFileDialog, QInputDialog
 from PySide2 import QtCore, QtGui, QtWidgets
 
 from os import walk
@@ -16,7 +16,7 @@ import mod.vars as mi_vars
 from vtn.vtn_prom import Ui_VtnaCombos
 from vtn.cla_busc import V_Buscar
 
-class V_Promos(QDialog):
+class V_Promos(QMainWindow):
     def __init__(self, VentanaAnterior, Lista = []):
         super(V_Promos, self).__init__()
         self.ui = Ui_VtnaCombos()
@@ -28,6 +28,8 @@ class V_Promos(QDialog):
         #self.ui.push_Bproduc.clicked.connect(self.Abrimos_Vtna_Buscar)
         self.ui.push_Descuento.clicked.connect(self.Aplicamos_Descuento)
         self.ui.push_Regalo.clicked.connect(self.Regalo_100_desc)
+        self.ui.push_Cprecio.clicked.connect(self.Cambia_Precio)
+        self.ui.push_Agregar_Envio.clicked.connect(self.Agrega_Envio)
         self.ui.push_Borrar.clicked.connect(self.Borrar_Uno)
         self.ui.push_Limpiar.clicked.connect(self.Limpiar)
 
@@ -68,7 +70,6 @@ class V_Promos(QDialog):
 
         self.PASOS = 0
         self.ui.push_Guardar_Imagen.setEnabled(False)
-        self.ui.push_Crear_Imagen.clicked.connect(self.Paso1)
 
     def closeEvent(self, event):
         event.ignore()
@@ -76,7 +77,9 @@ class V_Promos(QDialog):
         self.Ant.show()
 
     def showEvent(self, event):
+        # Actualiza los valores que están dentro del único combobox
         self.Actualiza_Combo()
+        # Si se abre ésta ventana luego de cerrar la de "Buscar", entonces carga las piezas seleccionadas
         if mi_vars.ORIGEN_BUSCAR == 1:
             mi_vars.ORIGEN_BUSCAR = 0
             if len(mi_vars.LISTABUSCADO) > 0:
@@ -155,11 +158,20 @@ class V_Promos(QDialog):
         else:
             QMessageBox.question(self, "Aviso!", "Debe seleccionar un producto de la lista para aplicar su descuento.", QMessageBox.Ok)
 
+    # Botón para cambiar un precio en particular
+    def Cambia_Precio(self):
+        pass
+
+    # Botón para agregar gastos de envío
+    def Agrega_Envio(self):
+        pass
+
     # Botón de borrar un ítem
     def Borrar_Uno(self):
         posicion = self.ui.list_Detalle.currentRow()
         self.ui.list_Detalle.takeItem(posicion)
         self.ui.list_Desc.takeItem(posicion)
+        self.ui.list_Puntos.takeItem(posicion)
         self.ui.list_Costo.takeItem(posicion)
         self.ui.list_Costo10.takeItem(posicion)
         self.ui.list_Pspv.takeItem(posicion)
@@ -169,6 +181,7 @@ class V_Promos(QDialog):
     # Botón de limpiar todas las listas
     def Limpiar(self):
         self.ui.list_Detalle.clear()
+        self.ui.list_Puntos.clear()
         self.ui.list_Desc.clear()
         self.ui.list_Costo.clear()
         self.ui.list_Costo10.clear()
@@ -377,6 +390,7 @@ class V_Promos(QDialog):
 
                 # Lista con los detalles
                 self.ui.list_Desc.addItem("0")
+                self.ui.list_Puntos.addItem(str(Registro[17]))
                 self.ui.list_Costo.addItem(fts.Formato_Decimal(Registro[13], 2))
                 self.ui.list_Costo10.addItem(fts.Formato_Decimal(Registro[14], 2))
                 self.ui.list_Pspv.addItem(fts.Formato_Decimal(Registro[15], 2))
@@ -403,6 +417,13 @@ class V_Promos(QDialog):
                 acumula += fts.Str_Float(self.ui.list_Costo.item(i).text())
             self.ui.label_TCosto.setText(fts.Formato_Decimal(acumula, 2))
             TotalCosto = acumula
+
+            # Total de la lista de puntos
+            acumula = 0
+            conDesc = False
+            for i in range(self.ui.list_Puntos.count()):
+                acumula += int(self.ui.list_Puntos.item(i).text())
+            self.ui.label_TPuntos.setText(str(acumula))
 
             # Total de la lista de precio de costo + el 10% y su total si hay descuento
             acumula = 0.0

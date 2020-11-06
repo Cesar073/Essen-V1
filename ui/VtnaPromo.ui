@@ -37,7 +37,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normalon>../../icon/home.png</normalon>
+      <normalon>../icon/home.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -109,7 +109,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normalon>../../icon/limpiararchivo2.png</normalon>
+       <normalon>../icon/limpiararchivo2.png</normalon>
       </iconset>
      </property>
      <property name="iconSize">
@@ -195,7 +195,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normalon>../../icon/goma.png</normalon>
+       <normalon>../icon/goma.png</normalon>
       </iconset>
      </property>
      <property name="iconSize">
@@ -324,7 +324,7 @@ border-color: rgb(95, 95, 95);</string>
      </property>
      <property name="icon">
       <iconset>
-       <normalon>../../icon/pngocean.com.png</normalon>
+       <normalon>../icon/pngocean.com.png</normalon>
       </iconset>
      </property>
      <property name="iconSize">
@@ -664,7 +664,7 @@ border-color: rgb(95, 95, 95);</string>
      </property>
      <property name="icon">
       <iconset>
-       <normalon>../../icon/cambiar.png</normalon>
+       <normalon>../icon/cambiar.png</normalon>
       </iconset>
      </property>
      <property name="iconSize">
@@ -744,7 +744,7 @@ border-color: rgb(95, 95, 95);</string>
      </property>
      <property name="icon">
       <iconset>
-       <normalon>../../icon/descuento2.png</normalon>
+       <normalon>../icon/descuento2.png</normalon>
       </iconset>
      </property>
      <property name="iconSize">
@@ -816,7 +816,7 @@ border-color: rgb(95, 95, 95);</string>
      </property>
      <property name="icon">
       <iconset>
-       <normalon>../../icon/buscarlupa.png</normalon>
+       <normalon>../icon/buscarlupa.png</normalon>
       </iconset>
      </property>
      <property name="iconSize">
@@ -1048,7 +1048,7 @@ border-color: rgb(95, 95, 95);</string>
      </property>
      <property name="icon">
       <iconset>
-       <normalon>../../icon/camioncito.png</normalon>
+       <normalon>../icon/camioncito.png</normalon>
       </iconset>
      </property>
      <property name="iconSize">

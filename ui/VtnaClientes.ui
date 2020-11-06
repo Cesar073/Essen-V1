@@ -1,670 +1,694 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Cliente_BD</class>
- <widget class="QDialog" name="Cliente_BD">
+ <widget class="QMainWindow" name="Cliente_BD">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1366</width>
+    <width>1400</width>
     <height>700</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
+  <property name="font">
+   <font>
+    <family>Arial Black</family>
+    <pointsize>14</pointsize>
+    <weight>75</weight>
+    <italic>true</italic>
+    <bold>true</bold>
+   </font>
   </property>
-  <widget class="QPushButton" name="push_Ficha">
-   <property name="geometry">
-    <rect>
-     <x>1190</x>
-     <y>140</y>
-     <width>160</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial Black</family>
-     <pointsize>16</pointsize>
-     <weight>75</weight>
-     <italic>true</italic>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normalon>icon/Ficha.png</normalon>
-    </iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>60</width>
-     <height>60</height>
-    </size>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QTextBrowser" name="text_Interes">
-   <property name="geometry">
-    <rect>
-     <x>600</x>
-     <y>350</y>
-     <width>581</width>
-     <height>321</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Calibri</family>
-     <weight>50</weight>
-     <italic>false</italic>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="html">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>320</y>
+      <width>581</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Candara</family>
+      <pointsize>18</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 0, 255);</string>
+    </property>
+    <property name="text">
+     <string>COMPRADO</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>10</y>
+      <width>671</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Candara</family>
+      <pointsize>18</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 0, 255);</string>
+    </property>
+    <property name="text">
+     <string>EN PROCESO</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_9">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>320</y>
+      <width>571</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Candara</family>
+      <pointsize>18</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 0, 255);</string>
+    </property>
+    <property name="text">
+     <string>DESEOS</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>491</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>DejaVu Sans</family>
+      <pointsize>18</pointsize>
+      <italic>true</italic>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 0, 255);</string>
+    </property>
+    <property name="text">
+     <string>Datos personales</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="push_Menu">
+    <property name="geometry">
+     <rect>
+      <x>1220</x>
+      <y>580</y>
+      <width>160</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Black</family>
+      <pointsize>16</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normalon>../icon/home.png</normalon>
+     </iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>60</width>
+      <height>60</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="text_Interes">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>350</y>
+      <width>581</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="html">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:12pt;&quot;&gt;cacerola cuadrada marsala de 24 - (ANT)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_13">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>491</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>DejaVu Sans</family>
-     <pointsize>18</pointsize>
-     <italic>true</italic>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 255);</string>
-   </property>
-   <property name="text">
-    <string>Datos personales</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>500</x>
-     <y>10</y>
-     <width>671</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Candara</family>
-     <pointsize>18</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 255);</string>
-   </property>
-   <property name="text">
-    <string>EN PROCESO</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="push_Nuevo">
-   <property name="geometry">
-    <rect>
-     <x>1190</x>
-     <y>50</y>
-     <width>160</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial Black</family>
-     <pointsize>16</pointsize>
-     <weight>75</weight>
-     <italic>true</italic>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normalon>icon/agregar persona.png</normalon>
-    </iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>60</width>
-     <height>60</height>
-    </size>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QTextBrowser" name="text_Encargado">
-   <property name="geometry">
-    <rect>
-     <x>510</x>
-     <y>40</y>
-     <width>671</width>
-     <height>271</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Calibri</family>
-     <weight>50</weight>
-     <italic>false</italic>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="html">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="text_Encargado">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>40</y>
+      <width>671</width>
+      <height>271</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="html">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:12pt;&quot;&gt;cacerola cuadrada marsala de 24 - (AL)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="push_Limpiar">
-   <property name="geometry">
-    <rect>
-     <x>1190</x>
-     <y>280</y>
-     <width>160</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial Black</family>
-     <pointsize>16</pointsize>
-     <weight>75</weight>
-     <italic>true</italic>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normalon>icon/limpiararchivo2.png</normalon>
-    </iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>60</width>
-     <height>60</height>
-    </size>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_7">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>320</y>
-     <width>581</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Candara</family>
-     <pointsize>18</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 255);</string>
-   </property>
-   <property name="text">
-    <string>COMPRADO</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QTextBrowser" name="text_Comprado">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>350</y>
-     <width>581</width>
-     <height>321</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Calibri</family>
-     <weight>50</weight>
-     <italic>false</italic>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="html">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="text_Comprado">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>350</y>
+      <width>581</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="html">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:12pt;&quot;&gt;cacerola cuadrada marsala de 24 - (ANT)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_9">
-   <property name="geometry">
-    <rect>
-     <x>600</x>
-     <y>320</y>
-     <width>571</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Candara</family>
-     <pointsize>18</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 255);</string>
-   </property>
-   <property name="text">
-    <string>DESEOS</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="push_Buscar">
-   <property name="geometry">
-    <rect>
-     <x>1190</x>
-     <y>370</y>
-     <width>160</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial Black</family>
-     <pointsize>16</pointsize>
-     <weight>75</weight>
-     <italic>true</italic>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normalon>icon/buscar persona.png</normalon>
-    </iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>60</width>
-     <height>60</height>
-    </size>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="groupBox">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>491</width>
-     <height>271</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string/>
-   </property>
-   <widget class="QLineEdit" name="line_Direccion">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>180</y>
-      <width>291</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Calibri</family>
-      <pointsize>12</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QPushButton" name="push_Ficha">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>70</y>
-      <width>171</width>
-      <height>21</height>
+      <x>1220</x>
+      <y>130</y>
+      <width>160</width>
+      <height>80</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Javanese Text</family>
-      <pointsize>14</pointsize>
+      <family>Arial Black</family>
+      <pointsize>16</pointsize>
       <weight>75</weight>
+      <italic>true</italic>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>TELÉFONO</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normalon>../icon/Ficha.png</normalon>
+     </iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>60</width>
+      <height>60</height>
+     </size>
     </property>
    </widget>
-   <widget class="QLineEdit" name="line_Telefono">
+   <widget class="QPushButton" name="push_Buscar">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>140</y>
-      <width>291</width>
-      <height>31</height>
+      <x>1220</x>
+      <y>360</y>
+      <width>160</width>
+      <height>80</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Calibri</family>
-      <pointsize>12</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="Label_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>30</y>
-      <width>171</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Javanese Text</family>
-      <pointsize>14</pointsize>
+      <family>Arial Black</family>
+      <pointsize>16</pointsize>
       <weight>75</weight>
+      <italic>true</italic>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>APE. Y NOMBRE</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normalon>../icon/buscar persona.png</normalon>
+     </iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>60</width>
+      <height>60</height>
+     </size>
     </property>
    </widget>
-   <widget class="QLineEdit" name="line_Dni">
+   <widget class="QPushButton" name="push_Limpiar">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>100</y>
-      <width>291</width>
-      <height>31</height>
+      <x>1220</x>
+      <y>270</y>
+      <width>160</width>
+      <height>80</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Calibri</family>
-      <pointsize>12</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="line_Apellido">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>60</y>
-      <width>291</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Calibri</family>
-      <pointsize>12</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="line_Nombre">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>20</y>
-      <width>291</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Calibri</family>
-      <pointsize>12</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_11">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>110</y>
-      <width>171</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Javanese Text</family>
-      <pointsize>14</pointsize>
+      <family>Arial Black</family>
+      <pointsize>16</pointsize>
       <weight>75</weight>
+      <italic>true</italic>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>FACEBOOK</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normalon>../icon/limpiararchivo2.png</normalon>
+     </iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>60</width>
+      <height>60</height>
+     </size>
     </property>
    </widget>
-   <widget class="QLabel" name="label_12">
+   <widget class="QPushButton" name="push_Nuevo">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>150</y>
-      <width>171</width>
-      <height>21</height>
+      <x>1220</x>
+      <y>40</y>
+      <width>160</width>
+      <height>80</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Javanese Text</family>
-      <pointsize>14</pointsize>
+      <family>Arial Black</family>
+      <pointsize>16</pointsize>
       <weight>75</weight>
+      <italic>true</italic>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>INSTAGRAM</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normalon>../icon/agregar persona.png</normalon>
+     </iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>60</width>
+      <height>60</height>
+     </size>
     </property>
    </widget>
-   <widget class="QLabel" name="label_10">
+   <widget class="QPushButton" name="push_Registro">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>190</y>
-      <width>171</width>
-      <height>20</height>
+      <x>1220</x>
+      <y>490</y>
+      <width>160</width>
+      <height>80</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Javanese Text</family>
-      <pointsize>14</pointsize>
+      <family>Arial Black</family>
+      <pointsize>16</pointsize>
       <weight>75</weight>
+      <italic>true</italic>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>CONTACTO</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normalon>../icon/registros5.png</normalon>
+     </iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>60</width>
+      <height>60</height>
+     </size>
     </property>
    </widget>
-   <widget class="QLineEdit" name="line_Contac1">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>220</y>
-      <width>291</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Calibri</family>
-      <pointsize>12</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>230</y>
-      <width>171</width>
-      <height>21</height>
+      <y>40</y>
+      <width>491</width>
+      <height>271</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <family>Javanese Text</family>
-      <pointsize>14</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
+    <property name="title">
+     <string/>
     </property>
-    <property name="text">
-     <string>CONEXIÓN</string>
-    </property>
+    <widget class="QLineEdit" name="line_Direccion">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>180</y>
+       <width>291</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Calibri</family>
+       <pointsize>12</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>171</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Javanese Text</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>TELÉFONO</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_Telefono">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>140</y>
+       <width>291</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Calibri</family>
+       <pointsize>12</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Label_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>171</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Javanese Text</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>APE. Y NOMBRE</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_Dni">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>100</y>
+       <width>291</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Calibri</family>
+       <pointsize>12</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_Apellido">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>60</y>
+       <width>291</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Calibri</family>
+       <pointsize>12</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_Nombre">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>20</y>
+       <width>291</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Calibri</family>
+       <pointsize>12</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_11">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>171</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Javanese Text</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>FACEBOOK</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_12">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
+       <width>171</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Javanese Text</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>INSTAGRAM</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_10">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>190</y>
+       <width>171</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Javanese Text</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>CONTACTO</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_Contac1">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>220</y>
+       <width>291</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Calibri</family>
+       <pointsize>12</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>230</y>
+       <width>171</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Javanese Text</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>CONEXIÓN</string>
+     </property>
+    </widget>
    </widget>
-  </widget>
-  <widget class="QPushButton" name="push_Registro">
-   <property name="geometry">
-    <rect>
-     <x>1190</x>
-     <y>500</y>
-     <width>160</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial Black</family>
-     <pointsize>16</pointsize>
-     <weight>75</weight>
-     <italic>true</italic>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normalon>icon/registros5.png</normalon>
-    </iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>60</width>
-     <height>60</height>
-    </size>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="push_Menu">
-   <property name="geometry">
-    <rect>
-     <x>1190</x>
-     <y>590</y>
-     <width>160</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial Black</family>
-     <pointsize>16</pointsize>
-     <weight>75</weight>
-     <italic>true</italic>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normalon>icon/home.png</normalon>
-    </iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>60</width>
-     <height>60</height>
-    </size>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
+   <zorder>label_7</zorder>
+   <zorder>label_8</zorder>
+   <zorder>label_9</zorder>
+   <zorder>push_Menu</zorder>
+   <zorder>text_Interes</zorder>
+   <zorder>text_Encargado</zorder>
+   <zorder>text_Comprado</zorder>
+   <zorder>push_Ficha</zorder>
+   <zorder>push_Buscar</zorder>
+   <zorder>push_Limpiar</zorder>
+   <zorder>push_Nuevo</zorder>
+   <zorder>push_Registro</zorder>
+   <zorder>groupBox</zorder>
+   <zorder>label_13</zorder>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>line_Nombre</tabstop>
+  <tabstop>line_Apellido</tabstop>
+  <tabstop>line_Dni</tabstop>
+  <tabstop>line_Telefono</tabstop>
+  <tabstop>line_Direccion</tabstop>
+  <tabstop>line_Contac1</tabstop>
+  <tabstop>text_Comprado</tabstop>
+  <tabstop>text_Encargado</tabstop>
+  <tabstop>text_Interes</tabstop>
+  <tabstop>push_Nuevo</tabstop>
+  <tabstop>push_Ficha</tabstop>
+  <tabstop>push_Limpiar</tabstop>
+  <tabstop>push_Buscar</tabstop>
+  <tabstop>push_Registro</tabstop>
+  <tabstop>push_Menu</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

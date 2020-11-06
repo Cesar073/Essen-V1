@@ -38,8 +38,13 @@ Los nombres de las funciones corresponden a una nomenclatura fija para un rápid
 
 '''
     HACER AHORA:
-    Ventana buscar: No anda bien el tema de la selección y deselección de elementos
+    Ventana Promo: Ajustar la nueva ventana, Puntos, Incorporar gastos de envío,
+
     Ventana Productos: Que no deje un mensaje cuando un producto está desactivado, sino que pinte de color el fondo del tilde correspondiente
+    Idem: La carga de precios de Excel debe:
+        * calcular aumentos y sugerirlo, poder editarlo y que lo aplique en todas las piezas que no se les ha tocado el precio
+
+    Ventana buscar: No anda bien el tema de la selección y deselección de elementos
 '''
 
 import time

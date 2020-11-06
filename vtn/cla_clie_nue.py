@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QDialog, QInputDialog, QMessageBox
+from PySide2.QtWidgets import QMainWindow, QInputDialog, QMessageBox
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtGui import QPixmap, QIcon
 
@@ -13,7 +13,7 @@ import mod.mdb as mdb
 import mod.form as fm
 
 
-class V_ClienteNuevo(QDialog):
+class V_ClienteNuevo(QMainWindow):
     def __init__(self, VentanaAnterior):
         super(V_ClienteNuevo, self).__init__()
         # Acabo de borrar el "self" de la línea de abajo, para poner éste recordatorio.
