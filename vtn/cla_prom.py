@@ -39,12 +39,13 @@ class V_Promos(QMainWindow):
         self.ui.push_Int4.clicked.connect(self.Btn_Int4)
         self.ui.push_Int5.clicked.connect(self.Btn_Int5)
 
-        self.ui.list_Detalle.clicked.connect(self.ClickLista1)
-        self.ui.list_Desc.clicked.connect(self.ClickLista2)
-        self.ui.list_Costo.clicked.connect(self.ClickLista3)
-        self.ui.list_Costo10.clicked.connect(self.ClickLista4)
-        self.ui.list_Pspv.clicked.connect(self.ClickLista5)
-        self.ui.list_Lista.clicked.connect(self.ClickLista6)
+        self.ui.list_Detalle.clicked.connect(lambda:self.ClickLista(self.ui.list_Detalle.currentRow()))
+        self.ui.list_Desc.clicked.connect(lambda:self.ClickLista(self.ui.list_Desc.currentRow()))
+        self.ui.list_Puntos.clicked.connect(lambda:self.ClickLista(self.ui.list_Puntos.currentRow()))
+        self.ui.list_Costo.clicked.connect(lambda:self.ClickLista(self.ui.list_Costo.currentRow()))
+        self.ui.list_Costo10.clicked.connect(lambda:self.ClickLista(self.ui.list_Costo10.currentRow()))
+        self.ui.list_Pspv.clicked.connect(lambda:self.ClickLista(self.ui.list_Pspv.currentRow()))
+        self.ui.list_Lista.clicked.connect(lambda:self.ClickLista(self.ui.list_Lista.currentRow()))
         
         self.ui.list_Desc.itemDoubleClicked.connect(self.Doble_Clic_Descuento)
 
@@ -160,11 +161,35 @@ class V_Promos(QMainWindow):
 
     # Botón para cambiar un precio en particular
     def Cambia_Precio(self):
-        pass
+        posicion = self.ui.list_Detalle.currentRow()
+        if posicion >= 0:
+            texto, ok = QInputDialog.getText(self, "Cambio de Precio", "Indique el monto a aplicar: \n Nota: El monto se aplica al precio de costo, lo demás se calcula automáticamente.")
+            if ok and fts.Es_Numero(float(texto)) == True:
+                Detalle = "COSTO EDITADO: " + self.ui.list_Detalle.item(posicion).text()
+                Puntos = self.ui.list_Puntos.item(posicion).text()
+                self.Borrar_Uno()
+                self.ui.list_Detalle.addItem(Detalle)
+                self.ui.list_Desc.addItem("0")
+                self.ui.list_Puntos.addItem(Puntos)
+                self.ui.list_Costo.addItem(fts.Formato_Decimal(texto, 2))
+                self.ui.list_Costo10.addItem(fts.Formato_Decimal(float(texto) * 1.1, 2))
+                Pspv = (float(texto) * 100) / 73
+                self.ui.list_Pspv.addItem(fts.Formato_Decimal(Pspv, 2))
+                self.ui.list_Lista.addItem(fts.Formato_Decimal(1.1 * Pspv, 2))
+                self.Act_Val_Ventana()
 
     # Botón para agregar gastos de envío
     def Agrega_Envio(self):
-        pass
+        texto, ok = QInputDialog.getText(self, "Agregar Envíos", "Indique el monto del Envío:")
+        if ok and texto != "":
+            self.ui.list_Detalle.addItem("***  GASTOS ENVÍOS  ***")
+            self.ui.list_Desc.addItem("0")
+            self.ui.list_Puntos.addItem("0")
+            self.ui.list_Costo.addItem(fts.Formato_Decimal(texto, 2))
+            self.ui.list_Costo10.addItem(fts.Formato_Decimal(texto, 2))
+            self.ui.list_Pspv.addItem(fts.Formato_Decimal(texto, 2))
+            self.ui.list_Lista.addItem(fts.Formato_Decimal(1.1 * float(texto), 2))
+            self.Act_Val_Ventana()
 
     # Botón de borrar un ítem
     def Borrar_Uno(self):
@@ -191,27 +216,10 @@ class V_Promos(QMainWindow):
         self.Act_Val_Ventana()
 
     # Hacer un Clic en las listas (es para que se seleccionen todas cuando se toca una y simule ser una única lista)
-    def ClickLista1(self):
-        pos = self.ui.list_Detalle.currentRow()
-        self.Seleccionamos_Listas(pos)
-    def ClickLista2(self):
-        pos = self.ui.list_Desc.currentRow()
-        self.Seleccionamos_Listas(pos)
-    def ClickLista3(self):
-        pos = self.ui.list_Costo.currentRow()
-        self.Seleccionamos_Listas(pos)
-    def ClickLista4(self):
-        pos = self.ui.list_Costo10.currentRow()
-        self.Seleccionamos_Listas(pos)
-    def ClickLista5(self):
-        pos = self.ui.list_Pspv.currentRow()
-        self.Seleccionamos_Listas(pos)
-    def ClickLista6(self):
-        pos = self.ui.list_Lista.currentRow()
-        self.Seleccionamos_Listas(pos)
-    def Seleccionamos_Listas(self, pos):
+    def ClickLista(self, pos):
         self.ui.list_Detalle.setCurrentRow(pos)
         self.ui.list_Desc.setCurrentRow(pos)
+        self.ui.list_Puntos.setCurrentRow(pos)
         self.ui.list_Costo.setCurrentRow(pos)
         self.ui.list_Costo10.setCurrentRow(pos)
         self.ui.list_Pspv.setCurrentRow(pos)

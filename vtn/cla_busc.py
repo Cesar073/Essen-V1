@@ -658,7 +658,7 @@ class V_Buscar(QDialog):
         Tope = len(LISTABPOS)
         Cont = 0
         while Cont < Tope:
-            self.Despinta_Seleccion(LISTABPOS[Cont])
+            self.Despinta_Seleccion(LISTABPOS[0])
             Cont += 1
         LISTABPOS = []
 

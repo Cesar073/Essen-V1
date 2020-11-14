@@ -9,7 +9,7 @@
 
 '''
 
-from PySide2.QtWidgets import QMainWindow, QMessageBox, QFileDialog
+from PySide2.QtWidgets import QMainWindow, QMessageBox, QFileDialog, QInputDialog
 # Módulos generales
 import os
 from os import walk
@@ -26,7 +26,6 @@ import mod.form as fts
 import mod.excel as exl
 import mod.vars as mi_vars
 
-AUTOM_ACT = 0
 
 class V_Productos(QMainWindow):
 
@@ -55,7 +54,30 @@ class V_Productos(QMainWindow):
         self.LINE_COD_ACTIVO = True
         self.LINE_PUNTOS_ACTIVO = True
         self.LINE_PUNTOSMG_ACTIVO = True
-        
+        # 06 - Valores de los colores para los background
+        # Color gris normal
+        self.R_Nor = 229
+        self.G_Nor = 229
+        self.B_Nor = 229
+        # Color Rojo, cuando un producto está desactivado
+        self.R_Des = 255
+        self.G_Des = 50
+        self.B_Des = 50
+        # Azul, Cuando un producto debería estar desactivado porque no está en Essen pero está activado porque tenemos en stock
+        self.R_Sto = 0
+        self.G_Sto = 0
+        self.B_Sto = 255
+        # Naranja, Remarca la diferencia
+        self.R_Dif = 255
+        self.G_Dif = 170
+        self.B_Dif = 127
+        # Es un número float que indica en porcentaje el aumento que se aplicaría a las piezas que no están en la lista nueva de excel pero podemos tener en stock
+        self.Porc_Aumento = 0.0
+
+        # Variables utilizadas en el bucle del excel
+        self.AUTOM_ACT = 0
+        self.Automatico = False
+
         # LES DAMOS VALOR A LAS VARIABLES
         # 02 - 03
         Datos = ['0']
@@ -88,6 +110,9 @@ class V_Productos(QMainWindow):
         self.ui.push_Limpiar.clicked.connect(self.LimpiarPantalla)
         self.ui.push_Excel.clicked.connect(self.Clic_RecorreExcel)
         self.ui.push_Menu.clicked.connect(self.CerrarProd)
+
+        # CHECKBOX
+        self.ui.checkBox_Activo.clicked.connect(self.Clic_Activo)
     
     def mostrar(self):
         self.show()
@@ -141,24 +166,7 @@ class V_Productos(QMainWindow):
 
     '''########################################################################################################################################
     ###########################################################################################################################################
-                                                  FUNCIONES RELATIVAS A BOTONES EVENTOS                                                     '''
-
-    def Abrimos_Vtna_Buscar(self): #***********
-        mi_vars.Lineas = []
-        mi_vars.Codigos = []
-        mi_vars.Descripcion = []
-        mi_vars.Pspv = []
-        mi_vars.Precio = []
-        mi_vars.Puntos = []
-        mi_vars.PuntosMG = []
-        mi_vars.Filas = []
-        mi_vars.ORIGEN_BUSCAR = 3
-        self.hide()
-        try:
-            self.ui.Ventana_Buscar.show()
-        except:
-            self.ui.Ventana_Buscar = V_Buscar(self)
-            self.ui.Ventana_Buscar.show()
+                                                FUNCIONES RELATIVAS A BOTONES EVENTOS                                                     '''
 
     def ChangeLineID(self): #***********
         # Si el ID está activado, se ejecuta su acción
@@ -293,7 +301,7 @@ class V_Productos(QMainWindow):
                 self.ui.line_ID.setFocus()
 
     # El valor Automático es para cuando el Excel está activado como automático. Esto quiere decir que todo control ya se ha realizado y sólo tenemos que continuar avanzando.
-    def Clic_Siguiente(self, Automatico = False, Controla = True): ###
+    def Clic_Siguiente(self, Controla = True): ###
 
         # Control: Si hubieron cambios y no se guardaron, aquí le avisamos al usuario y le permitimos guardarlo antes de continuar. Pero primero se fija si es que hay datos
             # en pantalla.
@@ -308,9 +316,10 @@ class V_Productos(QMainWindow):
                 self.MuestraMsjOK("Se ha llegado al final de la lista (producto nro: " + str(tope) + "), se cerrará el proceso de carga.", "Fin de la lista")
                 self.Deshabilita_Excel()
                 self.LimpiarPantalla()
+                # Ahora ajustamos todos los precios de las piezas y artículos de bazar que no han sido actualizados
+
             else:
-                valor = Automatico
-                self.Compara_Excel_BBDD(Automatico = valor)
+                self.Compara_Excel_BBDD()
         
         # Operación normal
         else:
@@ -363,36 +372,53 @@ class V_Productos(QMainWindow):
                 
                 # Le consultamos al usuario si desea que los valores se actualicen automáticamente o si quiere revisar uno por uno
                 Respuesta = QMessageBox.question(self, "Actualizar los datos del Excel", "Se está por ejecutar la ACTUALIZACIÓN de la base de datos con el EXCEL.  ¿Desea que el programa actualice todo automáticamente?. \n\n Nota: Sólo se actualizarán los productos que tengan alguna diferencia y el programa se detendrá cuando encuentre un producto nuevo.", QMessageBox.Yes | QMessageBox.No)
+
+                # Le avisamos al usuario q aquellos artículos que no estén en el nuevo mes, serán actualizados sus precios de todas formas en función al porcentaje que indique
+                texto, ok = QInputDialog.getInt(self, "Ingrese aumento", "A continuación debe indicar el aumento general que han sufrido los productos de Essen. \nEste aumento será aplicado a el resto de productos que no figuran en el archivo de Excel,\n y ésto es porque Essen no publica los precios de artículos de BAZAR o AYUDAVENTAS cuando no los tiene disponible durante el mes, pero uno debe actualizarlos \nigual porque podemos tener dichos artículos en stock y su precio debe ajustarse a todo el catálogo. \n Por ejemplo si queremos que los artículos ajusten su precio a un %10 de aumento entonces debemos colocar simplemente 10. No acepta números decimales")
+                if ok and fts.Es_Numero_Int(texto) == True:
+                    self.Porc_Aumento = int(texto)
                 
                 # Preparamos la información
                 mi_vars.Lineas, mi_vars.Codigos, mi_vars.Descripcion, mi_vars.Pspv, mi_vars.Precio, mi_vars.Puntos, mi_vars.PuntosMG, mi_vars.Filas = exl.Dev_Listas(Ruta, "Sheet1", 'H')
 
-                # Recorremos los códigos de la base de datos y los comparamos con los del excel y si algún producto no se encuentra en la lista
-                    # de excel le cargamos su código en una lista auxiliar (LISTAAUXILIAR). Durante el bucle no podemos actualizar los valores
-                    # de los productos a -> Desactivados, porque genera error de Base de datos bloqueada, ya que durante todo el bucle for la
-                    # misma se encuentra abierta, por ende se hace luego.
+                # Recorremos los códigos de la base de datos y los comparamos con los del excel y si algún producto no se encuentra en la lista de excel le cargamos su código 
+                    # en una lista auxiliar (LISTAAUXILIAR) para luego poder actualizar su valor y pasarlos a "Desactivados". Durante el bucle no podemos actualizar los 
+                    # valores de los productos a -> Desactivados, porque genera error de Base # de datos bloqueada, ya que durante todo el bucle for la misma se encuentra 
+                    # abierta, por ende se hace luego.
                 Tabla = mdb.Dev_Tabla(mi_vars.BaseDeDatos, 'Productos')
                 LISTAAUXILIAR = []
                 for reg in Tabla:
-                    try:
-                        print(mi_vars.Codigos.index(reg[2]))
-                    except:
+                    if reg[2] in mi_vars.Codigos:
+                        pass
+                    else:
                         LISTAAUXILIAR.append(reg[2])
                 Tabla = ""
 
-                # Controlamos si no es que ya están desactivados
+                # Los artículos que estaban activados ahora se guardan en LISTAAUXILIAR2 para luego dar aviso que ciertos artículos se van a desactivar
                 LISTAAUXILIAR2 = []
                 if len(LISTAAUXILIAR) > 0:
                     for i in LISTAAUXILIAR:
                         DatosAux = self.R_T_Retorna_Datos_De_BBDD(Codigo=i)
                         if DatosAux[1] == 1:
                             LISTAAUXILIAR2.append(DatosAux[2])
-                LISTAAUXILIAR = LISTAAUXILIAR2
+
+                # Actualizamos todos los artículos que no se hayan actualizado con anterioridad
+                for i in LISTAAUXILIAR:
+                    DatosAux = self.R_T_Retorna_Datos_De_BBDD(Codigo=i)
+                    # Hacemos este control para evitar que en el mismo mes se actualicen 2 veces los datos de los desactivados
+                    if fts.Devuelve_Valor_Mes(self.R_T_Dev_Fecha_Act()) != fts.Devuelve_Valor_Mes(DatosAux[21]):
+                        DatosAux[13] = fts.Redondear(DatosAux[13] * ((100 + self.Porc_Aumento) / 100))
+                        DatosAux[14] = fts.Redondear(DatosAux[13] * 1.1)
+                        DatosAux[15] = fts.Redondear((DatosAux[13] * 100) / (100 - mi_vars.PORC_GANANCIA))
+                        DatosAux[16] = fts.Redondear(DatosAux[15] * ((100 + mi_vars.PORC_INTER_TJTA) / 100))
+                        DatosAux[21] = self.R_T_Dev_Fecha_Act()
+                        self.V_T_Guarda_Actualizacion(DatosAux)
+
                 # Creamos un string que va a ser el mensaje para mostrar al usuario
-                Largo = len(LISTAAUXILIAR)
+                Largo = len(LISTAAUXILIAR2)
                 if Largo > 0:
                     MensajeAmostrar = 'Se DESACTIVARÁN los siguientes productos porque no se encuentran disponibles en el ciclo vigente: \n \n'
-                    for pos in LISTAAUXILIAR:
+                    for pos in LISTAAUXILIAR2:
                         DatosAux = self.R_T_Retorna_Datos_De_BBDD(Codigo=pos)
                         DatosAux[1] = 0
                         self.V_T_Guarda_Actualizacion(DatosAux)
@@ -410,13 +436,21 @@ class V_Productos(QMainWindow):
 
                 # True: Cuando decidió que el programa se actualice sólo. False: Se recorre producto por producto.
                 if Respuesta == QMessageBox.Yes:
-                    self.Compara_Excel_BBDD(Automatico=True)
+                    self.Automatico = True
                 else:
-                    self.Compara_Excel_BBDD()
+                    self.Automatico = False
+                self.Clic_Siguiente(Controla=False)
             else:
                 # Reestablecemos todo y damos aviso que no se ha podido establecer la ruta
                 self.Deshabilita_Excel()
                 self.MuestraMsjOK("No se ha podido cargar la RUTA del archivo especificado. Error desconocido [1556]", "Error al intentar cargar Ruta")
+
+    # Presionando clic en el checkbox de activación
+    def Clic_Activo(self):
+        if self.ui.checkBox_Activo.isChecked() == True:
+            self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Nor, self.G_Nor, self.B_Nor))
+        else:
+            self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Des, self.G_Des, self.B_Des))
 
     # Este evento se ejecuta cada vez que se presiona una tecla ya sea tanto en la pantalla como en los line_edit especificados. La dificultad de estos casos es mostrar un 
     # número decimal correcto teniendo en cuenta qué es lo que digita el usuario, por ello capturamos lo que digita en una variable, y luego traducimos ésto al LineEdit
@@ -509,8 +543,7 @@ class V_Productos(QMainWindow):
         # Se maneja con el valor que tenga mi_vars.CONTADOR_, buscando coincidencia del código que figure en éste momento en la variable mi_vars.Codigos[mi_vars.CONTADOR_]
         # Si el producto no se encuentra en la base de datos, da aviso y prepara todo para realizar la creación de un nuevo registro
         # Si hay que mostar algo en pantalla se encarga de hacerlo, y sino continúa solito recorriendo los demás productos
-    def Compara_Excel_BBDD(self, Automatico = False): ###
-        global AUTOM_ACT
+    def Compara_Excel_BBDD(self): ###
         Nuevo = False
         # La variable AUTOM_ACT contabiliza la cantidad de productos actualizados. En cada dato dispar se le suma un punto a dicha variable. Para que un mismo producto
             # que tenga varios ítems diferentes no sume varias veces el dato, usamos ésta variable local como bandera
@@ -521,7 +554,6 @@ class V_Productos(QMainWindow):
                 Diferencia = False
                 CantidadProd = len(mi_vars.Lineas)
                 Codigo = mi_vars.Codigos[mi_vars.CONTADOR_]
-
                 # Buscamos su información en la bd
                 # True: Cuando es un producto nuevo. False: Cuando existe ese producto
                 # El producto nuevo directamente activa la variable Diferencia
@@ -563,77 +595,78 @@ class V_Productos(QMainWindow):
                     Datos = self.R_T_Retorna_Datos_De_BBDD(Codigo=Codigo)
                     if Datos[1] == 0:
                         Diferencia = True
-                        if Automatico == True:
+                        Datos[1] = 1
+                        if self.Automatico == True:
                             AvisoAutom = True
-                            AUTOM_ACT += 1
-                            Datos[1] = 1
+                            self.AUTOM_ACT += 1
                         else:
-                            Datos[1] = 1
-                            self.ui.checkBox_Activo.setStyleSheet("background-color: rgb(255, 170, 127);")
+                            self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
                     # Precio de Costo y Costo10
                     mi_vars.Precio[mi_vars.CONTADOR_] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Precio[mi_vars.CONTADOR_])))
                     if Datos[13] != mi_vars.Precio[mi_vars.CONTADOR_]:
                         Diferencia = True
-                        if Automatico == True:
+                        if self.Automatico == True:
                             Datos[13] = mi_vars.Precio[mi_vars.CONTADOR_]
                             Datos[14] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Precio[mi_vars.CONTADOR_]*1.1)))
                             if AvisoAutom == False:
                                 AvisoAutom = True
-                                AUTOM_ACT += 1
+                                self.AUTOM_ACT += 1
                         else:
                             Datos[13] = mi_vars.Precio[mi_vars.CONTADOR_]
                             Datos[14] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Precio[mi_vars.CONTADOR_]*1.1)))
-                            self.ui.line_Pcio_Costo.setStyleSheet("background-color: rgb(255, 170, 127);")
-                            self.ui.line_Costo10.setStyleSheet("background-color: rgb(255, 170, 127);")
+                            self.ui.line_Pcio_Costo.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
+                            self.ui.line_Costo10.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
                     # PSPV y Pcio Lista
                     if Datos[15] != mi_vars.Pspv[mi_vars.CONTADOR_]:
                         Diferencia = True
-                        if Automatico == True:
+                        if self.Automatico == True:
                             Datos[15] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Pspv[mi_vars.CONTADOR_])))
                             Datos[16] = float((fts.Redondear((Datos[15] * 1.1) / 12)) * 12)
                             if AvisoAutom == False:
                                 AvisoAutom = True
-                                AUTOM_ACT += 1
+                                self.AUTOM_ACT += 1
                         else:
                             Datos[15] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Pspv[mi_vars.CONTADOR_])))
                             Datos[16] = float((fts.Redondear((Datos[15] * 1.1) / 12)) * 12)
-                            self.ui.line_PSPV.setStyleSheet("background-color: rgb(255, 170, 127);")
-                            self.ui.line_Pcio_Lista.setStyleSheet("background-color: rgb(255, 170, 127);")
+                            self.ui.line_PSPV.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
+                            self.ui.line_Pcio_Lista.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
                     # Puntos
                     if Datos[17] != mi_vars.Puntos[mi_vars.CONTADOR_]:
                         Diferencia = True
-                        if Automatico == True:
+                        if self.Automatico == True:
                             Datos[17] = mi_vars.Puntos[mi_vars.CONTADOR_]
                             if AvisoAutom == False:
                                 AvisoAutom = True
-                                AUTOM_ACT += 1
+                                self.AUTOM_ACT += 1
                         else:
                             Datos[17] = mi_vars.Puntos[mi_vars.CONTADOR_]
-                            self.ui.line_Puntos.setStyleSheet("background-color: rgb(255, 170, 127);")
+                            self.ui.line_Puntos.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
                     # Puntos MG
                     if Datos[18] != mi_vars.PuntosMG[mi_vars.CONTADOR_]:
                         Diferencia = True
-                        if Automatico == True:
+                        if self.Automatico == True:
                             Datos[18] = mi_vars.PuntosMG[mi_vars.CONTADOR_]
                             if AvisoAutom == False:
                                 AvisoAutom = True
-                                AUTOM_ACT += 1
+                                self.AUTOM_ACT += 1
                         else:
                             Datos[18] = mi_vars.PuntosMG[mi_vars.CONTADOR_]
-                            self.ui.line_Puntos_MG.setStyleSheet("background-color: rgb(255, 170, 127);")
+                            self.ui.line_Puntos_MG.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
                     if Diferencia == True:
                         Datos[19] = "[PRODUCTO NRO: " + str(mi_vars.CONTADOR_ + 1) + "   DE: " + str(CantidadProd) + "]"
-                
-                if Automatico == True:
+                    # Actualizamos la fecha, sí o sí, para estar seguros que estamos con los datos actualizados, hayan o no cambiado
+                    Datos[21] = self.R_T_Dev_Fecha_Act()
+
+                if self.Automatico == True:
                     if Diferencia == True:
                         # Si Nuevo = True: Se muestran los datos. Si Nuevo = False, se guardan cambios y se continúa.
                         if Nuevo == True:
                             self.V_T_Cargar_Datos(Datos, Nuevo=True)
                         else:
                             self.V_T_Guarda_Actualizacion(Datos)
-                            self.Clic_Siguiente(Automatico = True)
+                            self.Clic_Siguiente()
                     else:
-                        self.Clic_Siguiente(Automatico = True)
+                        self.Clic_Siguiente()
                 else:
                     # Si la variable Diferencia está en True, es porque hay un producto nuevo o hay diferencias entre los datos del excel y los de la bd, en ambos casos
                         # tenemos que mostrar en pantallas los valores. Y sino, se pasa al siguiente producto
@@ -643,7 +676,7 @@ class V_Productos(QMainWindow):
                         else:
                             self.V_T_Cargar_Datos(Datos)
                     else:
-                        self.Clic_Siguiente(Automatico = False)
+                        self.Clic_Siguiente()
         except:
             self.MuestraMsjOK("Se ha producido un error innesperado al intentar comparar la base de datos con los datos del archivo de Excel. Error [34555]", "Error")
 
@@ -746,10 +779,6 @@ class V_Productos(QMainWindow):
         dt = datetime.now()
         Resultado = str(dt.year) + '/' + str(dt.month) + '/' + str(dt.day)
         return Resultado
-
-
-
-
 
     '''########################################################################################################################################
     ###########################################################################################################################################
@@ -1334,6 +1363,7 @@ class V_Productos(QMainWindow):
         if LineLibre != 2:
             self.ui.line_Codigo.clear()
         self.ui.checkBox_Activo.setChecked(False)
+        self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Nor, self.G_Nor, self.B_Nor))
         self.ui.comboBox_Linea.setCurrentIndex(0)
         self.ui.comboBox_Tipo.setCurrentIndex(0)
         self.ui.comboBox_Interior.setCurrentIndex(0)
@@ -1385,8 +1415,9 @@ class V_Productos(QMainWindow):
     def Retorna_Imagenes(self, ruta = './img'):
         return next(walk(ruta))[2]
 
-    # Carga en la ventana los datos que pueden venir de la bd o el excel, en ambos casos se debe actualizar los datos globales. Tener en cuenta que se encarga de convertir los datos al formato que le corresponde, TENER EN CUENTA QUE ES IMPORTANTE QUE ÉSTA FUNCIÓN REALICE DICHO AJUSTE!
-    # Si el parámetro "Nuevo" viene en True, es porque se utiliza ésta misma función cuando en el Excel se encuentra un producto nuevo
+    # Carga en la ventana los datos que pueden venir de la bd o el excel, en ambos casos se debe actualizar los datos globales. Tener en cuenta que se encarga de convertir los 
+        # datos al formato que le corresponde, TENER EN CUENTA QUE ES IMPORTANTE QUE ÉSTA FUNCIÓN REALICE DICHO AJUSTE!
+        # Si el parámetro "Nuevo" viene en True, es porque se utiliza ésta misma función cuando en el Excel se encuentra un producto nuevo
     def V_T_Cargar_Datos(self, Datos, Nuevo = False):
         self.LINE_ID_ACTIVO = False
         self.LINE_COD_ACTIVO = False
@@ -1407,7 +1438,9 @@ class V_Productos(QMainWindow):
         # Activo
         self.ui.checkBox_Activo.setChecked(Datos[1])
         if Datos[1] == False:
-            self.MuestraMsjOK("Este producto está DESACTIVADO","Aviso importante!")
+            self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Des, self.G_Des, self.B_Des))
+        else:
+            self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Nor, self.G_Nor, self.B_Nor))
         # Codigo
         self.ui.line_Codigo.setText(Datos[2])
         self.ui.comboBox_Linea.setCurrentIndex(mi_vars.LINEANUM.index(Datos[3]))

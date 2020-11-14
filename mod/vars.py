@@ -44,3 +44,11 @@ LISTA_TIPOS_IMAGENES = []
 
 # Base de datos de Clientes
 DB_CLIENTES = "./db\\clie.db"
+
+# Cuando se realicen cálculos de ganancia bruta en los productos, se basarán en el valor colocado en ésta variable que indica por ejemplo que hay una ganancia del 27% 
+    # actualmente
+PORC_GANANCIA = 27
+
+# Es el porcentaje que se tiene que agregar a los cálculos con tarjetas, por ejemplo, cuando uno paga con tarjeta de crédito por el momento al pspv se le agrega un 10% ya que 
+    # es lo que le cobran las tarjetas a Essen para que a ellos se le acredite el valor correcto, entonces por ahora con un 10, indicamos que ese es el % de aumento
+PORC_INTER_TJTA = 10
