@@ -32,14 +32,12 @@ class V_Productos(QMainWindow):
     '''########################################################################################################################################
     ###########################################################################################################################################
                                                     FUNCIONES RELATIVAS A LA VENTANA                                                        '''
-    def __init__(self, VentanaAnterior):
+    def __init__(self):
         super(V_Productos, self).__init__()
         self.ui = Ui_Productos()
         self.ui.setupUi(self)
 
         # VARIABLES
-        # 01 - Ventana que se debe abrir al cerrar ésta
-        self.Ant = VentanaAnterior
         # 02 - Total de Productos en la db
         self.TOTAL = 0
         # 03 - Total de Productos activos
@@ -109,7 +107,7 @@ class V_Productos(QMainWindow):
         self.ui.push_Guardar.clicked.connect(self.Clic_Guardar)
         self.ui.push_Limpiar.clicked.connect(self.LimpiarPantalla)
         self.ui.push_Excel.clicked.connect(self.Clic_RecorreExcel)
-        self.ui.push_Menu.clicked.connect(self.CerrarProd)
+        #self.ui.push_Menu.clicked.connect(self.CerrarProd)
 
         # CHECKBOX
         self.ui.checkBox_Activo.clicked.connect(self.Clic_Activo)
@@ -138,6 +136,12 @@ class V_Productos(QMainWindow):
 
     def closeEvent(self, event):
         # VARIABLES (Su detalle está en el INIT)
+        print("Paso 1")
+        #event.ignore()
+        self.CerrarProd(event)
+
+    def CerrarProd(self, event = ""):
+        
         if mi_vars.EXCEL == True:
             close = QMessageBox.question(self, "Salir", "Se está ejecutando la ACTUALIZACIÓN de la base de datos con el EXCEL, si sale de la ventana quedará incompleta la carga de productos. ¿Estás seguro/a que desea salir?", QMessageBox.Yes | QMessageBox.No)
             if close == QMessageBox.Yes:
@@ -150,18 +154,21 @@ class V_Productos(QMainWindow):
                 mi_vars.Puntos = []
                 mi_vars.PuntosMG = []
                 mi_vars.Filas = []
-                event.ignore()
+                if event != "":
+                    event.ignore()
                 self.hide()
-                self.Ant.show()
+                return 0
             else:
-                event.ignore()
+                if event != "":
+                    event.ignore()
+                return 1
         else:
-            event.ignore()
+            if event != "":
+                event.ignore()
+                g
             self.hide()
-            self.Ant.show()
-
-    def CerrarProd(self):
-        self.close()
+            #self.Ant.show()
+            return 0
 
 
     '''########################################################################################################################################
@@ -365,7 +372,7 @@ class V_Productos(QMainWindow):
             
             # Abrimos la ventana para que el usuario cargue en el sistema el archivo en cuestión
             Ruta = ""
-            Ruta, _ = QFileDialog.getOpenFileName(self, 'Buscar Archivo', QDir.homePath(), "All Files (*.xlsx);;All Files (*.xls);;All Files (*.ods);;All Files (*.xlt);;All Files (*)")
+            Ruta, _ = QFileDialog.getOpenFileName(self, 'Buscar Archivo', QDir.homePath(), "All Files (*.xlsx)")
             
             # True: Operación normal. False: Ocurrió un error y no se ha podido encontrar la ruta
             if Ruta != "":

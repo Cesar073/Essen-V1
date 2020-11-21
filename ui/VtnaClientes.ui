@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1400</width>
+    <width>1366</width>
     <height>700</height>
    </rect>
   </property>
@@ -133,8 +133,8 @@
    <widget class="QPushButton" name="push_Menu">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>580</y>
+      <x>1200</x>
+      <y>590</y>
       <width>160</width>
       <height>80</height>
      </rect>
@@ -241,8 +241,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="push_Ficha">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>130</y>
+      <x>1200</x>
+      <y>220</y>
       <width>160</width>
       <height>80</height>
      </rect>
@@ -274,8 +274,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="push_Buscar">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>360</y>
+      <x>1200</x>
+      <y>40</y>
       <width>160</width>
       <height>80</height>
      </rect>
@@ -307,8 +307,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="push_Limpiar">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>270</y>
+      <x>1200</x>
+      <y>500</y>
       <width>160</width>
       <height>80</height>
      </rect>
@@ -340,8 +340,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="push_Nuevo">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>40</y>
+      <x>1200</x>
+      <y>130</y>
       <width>160</width>
       <height>80</height>
      </rect>
@@ -361,39 +361,6 @@ p, li { white-space: pre-wrap; }
     <property name="icon">
      <iconset>
       <normalon>../icon/agregar persona.png</normalon>
-     </iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>60</width>
-      <height>60</height>
-     </size>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="push_Registro">
-    <property name="geometry">
-     <rect>
-      <x>1220</x>
-      <y>490</y>
-      <width>160</width>
-      <height>80</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Black</family>
-      <pointsize>16</pointsize>
-      <weight>75</weight>
-      <italic>true</italic>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normalon>../icon/registros5.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -656,6 +623,39 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="push_Importar_Contactos">
+    <property name="geometry">
+     <rect>
+      <x>1200</x>
+      <y>310</y>
+      <width>160</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Black</family>
+      <pointsize>16</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normalon>../icon/CSV.png</normalon>
+     </iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>60</width>
+      <height>60</height>
+     </size>
+    </property>
+   </widget>
    <zorder>label_7</zorder>
    <zorder>label_8</zorder>
    <zorder>label_9</zorder>
@@ -667,9 +667,9 @@ p, li { white-space: pre-wrap; }
    <zorder>push_Buscar</zorder>
    <zorder>push_Limpiar</zorder>
    <zorder>push_Nuevo</zorder>
-   <zorder>push_Registro</zorder>
    <zorder>groupBox</zorder>
    <zorder>label_13</zorder>
+   <zorder>push_Importar_Contactos</zorder>
   </widget>
  </widget>
  <tabstops>
@@ -686,7 +686,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>push_Ficha</tabstop>
   <tabstop>push_Limpiar</tabstop>
   <tabstop>push_Buscar</tabstop>
-  <tabstop>push_Registro</tabstop>
   <tabstop>push_Menu</tabstop>
  </tabstops>
  <resources/>

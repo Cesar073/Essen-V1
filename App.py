@@ -38,13 +38,9 @@ Los nombres de las funciones corresponden a una nomenclatura fija para un rápid
 
 '''
     HACER AHORA:
-    Ventana Promo: Ajustar la nueva ventana, Puntos, Incorporar gastos de envío,
-
-    Ventana Productos: Que no deje un mensaje cuando un producto está desactivado, sino que pinte de color el fondo del tilde correspondiente
-    Idem: La carga de precios de Excel debe:
-        * calcular aumentos y sugerirlo, poder editarlo y que lo aplique en todas las piezas que no se les ha tocado el precio
-
-    Ventana buscar: No anda bien el tema de la selección y deselección de elementos
+    * Quitar la navegación entre ventanas y traerlas al archivo App.py
+    * Que no active más los productos por su cuenta cuando carga un excel, ahora se realizarán manualmente
+    * Crear que la forma de activar productos lo haga de manera automática
 '''
 
 import time
@@ -82,11 +78,11 @@ class V_Menu(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.Vent_Produc = V_Productos(self)
+        self.Vent_Produc = V_Productos()
         self.Vent_Promos = V_Promos(self)
         #self.Vent_Pedido = V_Pedidos(self)
         self.Vent_Ventas = V_Ventas(self)
-        self.Vent_Client = V_Clientes(self)
+        self.Vent_Client = V_Clientes()
         self.Vent_ClieNu = V_ClienteNuevo(self)
         self.Vent_Stock = V_Stock(self)
         #self.Vent_Record = V_Recordatorio(self)
@@ -110,6 +106,10 @@ class V_Menu(QMainWindow):
         self.Vent_Produc.ui.push_Buscar.clicked.connect(self.Abrir_Buscar_Prod)
         self.Vent_ClieNu.ui.push_Agrega_Deseo.clicked.connect(self.Abrir_Buscar_Clie)
 
+        # Botones que vuelven al menú
+        self.Vent_Produc.ui.push_Menu.clicked.connect(self.Abrir_Menu_Prod)
+        self.Vent_Client.ui.push_Menu.clicked.connect(self.Abrir_Menu_Clientes)
+
         # VARIABLES
         # Para los productos
         gf.Act_Listas_Globales()
@@ -129,11 +129,22 @@ class V_Menu(QMainWindow):
         self.Vent_Produc.hide()
         self.Vent_Buscar.show()
 
+    # Función que abre el MENÚ desde PRODUCTOS
+    def Abrir_Menu_Prod(self):
+        valor = self.Vent_Produc.CerrarProd()
+        if valor == 0:
+            ui.show()
+
     # Función que abre la ventana BUSCAR desde Cliente Nuevo
     def Abrir_Buscar_Clie(self):
         mi_vars.ORIGEN_BUSCAR = 4
         self.Vent_ClieNu.hide()
         self.Vent_Buscar.show()
+
+    # Función que abre menú
+    def Abrir_Menu_Clientes(self):
+        self.Vent_Client.hide()
+        ui.show()
 
     def Abrir_Prod(self):
         self.hide()
@@ -182,43 +193,20 @@ class V_Menu(QMainWindow):
         else:
             event.ignore()
 
+
+    
+
+
 # ================================================================
 if __name__ == '__main__':
     
     aplicacion = QApplication(sys.argv)
 
-
-    # Crea y muestra el splash screen
-    path = './splashscreen_background.jpg' ## NUEVA LÍNEA
-    splash_pix = QPixmap(str(path)) ## NUEVA LÍNEA
-    splash = QSplashScreen( ## NUEVA LÍNEA
-        splash_pix, ## NUEVA LÍNEA
-        Qt.WindowStaysOnTopHint ## NUEVA LÍNEA
-    ) ## NUEVA LÍNEA
-    splash.setEnabled(False) ## NUEVA LÍNEA
-    splash.show() ## NUEVA LÍNEA
-
-    
-    '''
-    # Esto es un simple contador/temporizador para mostrar en pantalla
-    # el splash screen. En el futuro haremos que esto sea más útil.
-    for i in range(0, 5): ## NUEVA LÍNEA
-        msg = ( ## NUEVA LÍNEA
-            '<h1><font color="yellow">' ## NUEVA LÍNEA
-             f'Listo en {5-i}s' ## NUEVA LÍNEA
-             '</font></h1>' ## NUEVA LÍNEA
-        ) ## NUEVA LÍNEA
-        splash.showMessage( ## NUEVA LÍNEA
-            msg, ## NUEVA LÍNEA
-            int(Qt.AlignBottom) | int(Qt.AlignHCenter),  ## NUEVA LÍNEA
-            Qt.black  ## NUEVA LÍNEA
-        ) ## NUEVA LÍNEA
-        time.sleep(1) ## NUEVA LÍNEA
-        aplicacion.processEvents() ## NUEVA LÍNEA
-    '''
-
-
-
+    splash = QSplashScreen(QPixmap('./splashscreen_background.jpg'))
+        # By default, SplashScreen will be in the center of the screen.
+        # You can move it to a specific location if you want:
+        # self.splash.move(10,10)
+    splash.show()
 
     ui = V_Menu()
     ui.show()

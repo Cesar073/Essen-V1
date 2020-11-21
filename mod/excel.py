@@ -6,6 +6,8 @@ Corresponde a las funciones que tienen relación con hojas de cálculo. Funcione
 #from datetime import timedelta
 # Abre, modifica y guarda los cambios en archivos excel
 import openpyxl as op
+# Importado para convertir csv a xlsx
+import pandas as pd
 
 # Devuelve 7 listas que tienen lo siguiente:
     # Lista1 = Línea
@@ -77,6 +79,99 @@ def Dev_Listas(Nom_Libro, Nom_Hoja, ColumnaPrecio):
             Cont += 1
             #print(Cont)
         return Lista1, Lista2, Lista3, Lista4, Lista5, Lista6, Lista7, Lista8
+    except:
+        return Aviso
+
+# La función extraerá la cantidad de datos posible, y cuando se encuentre con 10 celdas vacías consecutivas, terminará. Aún así sólo cargará los datos de aquellas filas que
+    # tengan algún código cargado.
+# IMPORTANTE: Para el módulo, la fila 1 del archivo = 0.
+def Dev_Listas_Contactos(Nom_Libro, Nom_Hoja):
+    Aviso = 0
+    try:
+        wb = op.load_workbook(Nom_Libro, data_only=True)
+        Aviso += 1
+        Hoja = wb.get_sheet_by_name(Nom_Hoja)
+        Aviso += 1
+
+        Col_0 = Hoja['A']   # Modo agendado
+        Col_1 = Hoja['B']   # Nombre1
+        Col_2 = Hoja['C']   # Nombre2
+        Col_3 = Hoja['D']   # Apellido
+        Col_4 = Hoja['E']   # E, F, G, H, I, J: Nombre3
+        Col_5 = Hoja['F']   
+        Col_6 = Hoja['G']
+        Col_7 = Hoja['H']
+        Col_8 = Hoja['I']
+        Col_9 = Hoja['J']
+        Col_10 = Hoja['AG'] # Celular
+        Col_11 = Hoja['AI'] # Dirección
+        Col_12 = Hoja['AR'] # Cuenta Bussines
+
+        Lista1 = []
+        Lista2 = []
+        Lista3 = []
+        Lista4 = []
+        Lista5 = []
+        Lista6 = []
+        Lista7 = []
+        Lista8 = []
+
+        Tope = len(Col_0)
+        Cont = 1
+        while Cont < Tope:
+            # Columna de Modo Agendado
+            if Col_0[Cont].value != None:
+                Lista1.append(Col_0[Cont].value)
+            else:
+                Lista1.append("")
+            # Columna de Nombre1
+            if Col_1[Cont].value != None:
+                Lista2.append(Col_1[Cont].value)
+            else:
+                Lista2.append("")
+            # Columna de Nombre2
+            if Col_2[Cont].value != None:
+                Lista3.append(Col_2[Cont].value)
+            else:
+                Lista3.append("")
+            # Columna de Apellido
+            if Col_3[Cont].value != None:
+                Lista4.append(Col_3[Cont].value)
+            else:
+                Lista4.append("")
+            # Columna de Nombre3
+            aux = ""
+            if Col_4[Cont].value != None:
+                aux = Col_4[Cont].value
+            if Col_5[Cont].value != None:
+                aux += " " + Col_5[Cont].value
+            if Col_6[Cont].value != None:
+                aux += " " + Col_6[Cont].value
+            if Col_7[Cont].value != None:
+                aux += " " + Col_7[Cont].value
+            if Col_8[Cont].value != None:
+                aux += " " + Col_8[Cont].value
+            if Col_9[Cont].value != None:
+                aux += " " + Col_9[Cont].value
+            Lista5.append(aux)
+            # Columna de Celular
+            if Col_10[Cont].value != None:
+                Lista6.append(Col_10[Cont].value)
+            else:
+                Lista6.append("")
+            # Columna de Dirección
+            if Col_11[Cont].value != None:
+                Lista7.append(Col_11[Cont].value)
+            else:
+                Lista7.append("")
+            # Columna de Cuenta Bussines
+            if Col_12[Cont].value != None:
+                Lista8.append(Col_12[Cont].value)
+            else:
+                Lista8.append("")
+            Cont += 1
+            #print(Cont)
+        return Lista1, Lista4, Lista2, Lista3, Lista5, Lista6, Lista7, Lista8
     except:
         return Aviso
 
@@ -305,5 +400,12 @@ def Escribe_Lista_Suma_Coincidencias(Nom_Libro, Nom_Hoja, Matriz, Col_Ini, Fila_
         else:
             return 0
 
+# Convertimos un archivo con pandas
+def Convierte_csv_xlsx_Pandas(Path_csv, Destino):
+    pd.read_csv(Path_csv).to_excel(Destino, index=False)
+
+
 print('Módulo Mi_Openpyxl.py cargado correctamente.')
 #print(Dev_Listas('D:/Programación/Python/Proyectos/Essen/Anexo4.xlsx','Sheet1', 'H'))
+
+#Convierte_csv_xlsx_Pandas("./contacts.csv", "./Excel_Pandas.xlsx")

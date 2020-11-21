@@ -152,10 +152,10 @@ def Dev_Total_Tabla_Clie(Tabla):
 def Dev_ID_ClienteTexto(Tabla, ColumnaCompara, DatoTexto):
     sql = "SELECT ID FROM {} WHERE {} = '{}'" .format(Tabla, ColumnaCompara, DatoTexto)
     Resultado = Realiza_consulta("./db\\clie.db",sql)
-    aux = 0
+    aux = -1
     for res in Resultado:
         aux = res[0] 
-    return int(aux)
+    return aux
 
 def Dev_ID_ClienteInt(Tabla, ColumnaCompara, DatoEntero):
     sql = "SELECT ID FROM {} WHERE {} = {}" .format(Tabla, ColumnaCompara, DatoEntero)
@@ -197,6 +197,17 @@ def Add_Cliente_Nuevo_WspVinculado( Trato, Difusion1, Difusion2, Difusion3, MsjP
     sql = "INSERT INTO WspVinculado VALUES(NULL, ?, ?, ?, ?, ?)"
     parametros = ( Trato, Difusion1, Difusion2, Difusion3, MsjProgramado)
     Realiza_consulta("./db\\clie.db", sql, parametros)
+
+# Actualiza los datos de un cliente previamente agendado, se usa en la actualización desde un csv descargado de la cuenta del celular
+def Act_Cliente(ID, Celular, Apellido, Nom1, Nom2, Nom3, Direccion, Comentario):
+    query = 'UPDATE Contacto SET Celular = ?, Direccion = ? WHERE ID = ?'
+    parameters = ( Celular, Direccion, ID)
+    Realiza_consulta("./db\\clie.db", query, parameters)
+
+    query = 'UPDATE DatosPersonales SET Apellido1 = ?, Nombre1 = ?, Nombre2 = ?, Nombre3 = ?, Comentario = ? WHERE ID = ?'
+    parameters = (Apellido, Nom1, Nom2, Nom3, Comentario, ID)
+    Realiza_consulta("./db\\clie.db", query, parameters)
+
 '''########################################################################################################################################
 ###########################################################################################################################################
                                                                 GENERAL                                                                 '''
@@ -206,21 +217,21 @@ def Dev_Tabla(BaseDeDatos, Tabla):
     Resultado = Realiza_consulta(BaseDeDatos, sql)
     return Resultado
 
-# DEVUELVE UN REGISTRO BUSCADO SEGÚN UN DATO EN PARTICULAR
+# DEVUELVE UN REGISTRO BUSCADO SEGÚN UN DATO EN STRING
 def Reg_Un_param(BaseDeDatos, Tabla, Columna, DatoCoincide):
     sql = "SELECT * FROM {} WHERE {} = '{}'" .format( Tabla, Columna, DatoCoincide)
     Resultado = Realiza_consulta(BaseDeDatos,sql)
     return Resultado
 
-
-
-
-
+# DEVUELVE UN REGISTRO BUSCADO SEGÚN UN DATO EN ENTERO
+def Reg_Un_param_Int(BaseDeDatos, Tabla, Columna, DatoCoincide):
+    sql = "SELECT * FROM {} WHERE {} = {}" .format( Tabla, Columna, DatoCoincide)
+    Resultado = Realiza_consulta(BaseDeDatos,sql)
+    return Resultado
 
 '''########################################################################################################################################
 ###########################################################################################################################################
                                                                 GENERAL                                                                 '''
-
 
 # INSERTA UN REGISTRO EN LA BASE DE DATOS
 def Reg_Add(BaseDeDatos, Activo, Codigo, Linea, Tipo, Interior, Repuesto, ConceptoBazar, ConceptoAyVta, PedidosEsp, Otros,Tamanio, Litros, PcioCosto, Costo10, PSPV, PcioLista, Puntos, PuntosMG, Comentarios, Imagen, Actualizado):
@@ -324,3 +335,5 @@ def Realiza_consulta( BaseDeDatos, query, parameters = ()):
 
 #print(str(Dev_ID_ClienteInt("ConfigFormaPago", "Orden", 2)))
 #print(str(Dev_ID_ClienteTexto("ConfigFormaPago", "Nombre", "Visa")))
+
+#print(Dev_ID_ClienteTexto("Contacto","Agendado_Cel","Pg 1093"))
