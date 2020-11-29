@@ -83,12 +83,12 @@ class V_Menu(QMainWindow):
         #self.Vent_Pedido = V_Pedidos(self)
         self.Vent_Ventas = V_Ventas(self)
         self.Vent_Client = V_Clientes()
-        self.Vent_ClieNu = V_ClienteNuevo(self)
         self.Vent_Stock = V_Stock(self)
         #self.Vent_Record = V_Recordatorio(self)
         #self.Vent_Estado = V_Estado(self)
         self.Vent_Config = V_Configuracion(self)
-        self.Vent_Buscar = V_Buscar(self.Vent_Produc, self.Vent_Promos)
+        self.Vent_ClieNu = V_ClienteNuevo()
+        self.Vent_Buscar = V_Buscar(self.Vent_Produc, self.Vent_Promos, self.Vent_ClieNu)
 
         # Botones
         self.ui.push_Producto.clicked.connect(self.Abrir_Prod)
@@ -104,11 +104,16 @@ class V_Menu(QMainWindow):
         # Botones que abren la ventana de BUSCAR desde otras ventanas
         self.Vent_Promos.ui.push_Bproduc.clicked.connect(self.Abrir_Buscar_Prom)
         self.Vent_Produc.ui.push_Buscar.clicked.connect(self.Abrir_Buscar_Prod)
-        self.Vent_ClieNu.ui.push_Agrega_Deseo.clicked.connect(self.Abrir_Buscar_Clie)
+        self.Vent_ClieNu.ui.push_Agrega_Deseo.clicked.connect(self.AbrirBuscar_ClieN)
 
         # Botones que vuelven al menú
         self.Vent_Produc.ui.push_Menu.clicked.connect(self.Abrir_Menu_Prod)
         self.Vent_Client.ui.push_Menu.clicked.connect(self.Abrir_Menu_Clientes)
+
+        # Otros botones de navegación
+        self.Vent_Client.ui.push_Nuevo.clicked.connect(self.Abrir_ClieN_Clie)
+        self.Vent_ClieNu.ui.push_Anterior.clicked.connect(self.Abrir_Clie_ClieN)
+        self.Vent_Client.ui.push_Ficha.clicked.connect(self.Abrir_Clie_Ficha)
 
         # VARIABLES
         # Para los productos
@@ -129,22 +134,35 @@ class V_Menu(QMainWindow):
         self.Vent_Produc.hide()
         self.Vent_Buscar.show()
 
+    # Función que abre la ventana BUSCAR desde Clientes Nuevos
+    def AbrirBuscar_ClieN(self):
+        mi_vars.ORIGEN_BUSCAR = 4
+        self.Vent_ClieNu.hide()
+        self.Vent_Buscar.show()
+
     # Función que abre el MENÚ desde PRODUCTOS
     def Abrir_Menu_Prod(self):
         valor = self.Vent_Produc.CerrarProd()
         if valor == 0:
             ui.show()
 
-    # Función que abre la ventana BUSCAR desde Cliente Nuevo
-    def Abrir_Buscar_Clie(self):
-        mi_vars.ORIGEN_BUSCAR = 4
-        self.Vent_ClieNu.hide()
-        self.Vent_Buscar.show()
-
     # Función que abre menú
     def Abrir_Menu_Clientes(self):
         self.Vent_Client.hide()
         ui.show()
+
+    def Abrir_ClieN_Clie(self):
+        self.Vent_Client.hide()
+        self.Vent_ClieNu.show()
+
+    def Abrir_Clie_ClieN(self):
+        self.Vent_ClieNu.hide()
+        self.Vent_Client.show()
+
+    def Abrir_Clie_Ficha(self):
+        self.Vent_Client.hide()
+        self.Vent_ClieNu.Cli_buscado = self.Vent_Client.CLIENTE_BUSCADO
+        self.Vent_ClieNu.show()
 
     def Abrir_Prod(self):
         self.hide()

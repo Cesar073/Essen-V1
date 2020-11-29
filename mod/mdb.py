@@ -64,6 +64,8 @@ ESTRUCTURA DE LA BASE DE DATOS Prod.db
 
 #Biblioteca para conectarse a base de datos SQLite
 import sqlite3
+import mod.vars as mi_vars
+#import vars as mi_vars
 
 '''########################################################################################################################################
 ###########################################################################################################################################
@@ -128,22 +130,27 @@ def Act_Regalo_Margen(Valor):
 ###########################################################################################################################################
                                                             BD: clie.db                                                                '''
 
+# Devuelve el registro de una tabla en particular
+def Dev_Reg_Segun_Tabla(Tabla, Columna, DatoCoincide):
+    reg = Reg_Un_param_Int(mi_vars.DB_CLIENTES, Tabla, Columna, DatoCoincide)
+    return reg
+
 # Devuelve 2 variables, la tabla completa que se haya solicitado y el total de registros que tiene
 def Dev_Tabla_Clie_Total(Tabla):
     Total = 0
-    _Tabla = Dev_Tabla("./db\\clie.db", Tabla)
-    Registro = Reg_Un_param("./db\\clie.db", "sqlite_sequence", "name", Tabla)
+    _Tabla = Dev_Tabla(mi_vars.DB_CLIENTES, Tabla)
+    Registro = Reg_Un_param(mi_vars.DB_CLIENTES, "sqlite_sequence", "name", Tabla)
     for reg in Registro:
         Total = reg[1]
     return _Tabla, Total
 
 # Devuelve la tabla solicitada de la base de datos de clientes
 def Dev_Tabla_Clie(Tabla):
-    return Dev_Tabla("./db\\clie.db", Tabla)
+    return Dev_Tabla(mi_vars.DB_CLIENTES, Tabla)
 
 # Devuelve el total de registros de la tabla solicitada de la base de datos de clientes
 def Dev_Total_Tabla_Clie(Tabla):
-    reg = Reg_Un_param("./db\\clie.db", "sqlite_sequence", "name", Tabla)
+    reg = Reg_Un_param(mi_vars.DB_CLIENTES, "sqlite_sequence", "name", Tabla)
     valor = 0
     for i in reg:
         valor = i[1]
@@ -151,7 +158,7 @@ def Dev_Total_Tabla_Clie(Tabla):
 
 def Dev_ID_ClienteTexto(Tabla, ColumnaCompara, DatoTexto):
     sql = "SELECT ID FROM {} WHERE {} = '{}'" .format(Tabla, ColumnaCompara, DatoTexto)
-    Resultado = Realiza_consulta("./db\\clie.db",sql)
+    Resultado = Realiza_consulta(mi_vars.DB_CLIENTES,sql)
     aux = -1
     for res in Resultado:
         aux = res[0] 
@@ -159,11 +166,31 @@ def Dev_ID_ClienteTexto(Tabla, ColumnaCompara, DatoTexto):
 
 def Dev_ID_ClienteInt(Tabla, ColumnaCompara, DatoEntero):
     sql = "SELECT ID FROM {} WHERE {} = {}" .format(Tabla, ColumnaCompara, DatoEntero)
-    Resultado = Realiza_consulta("./db\\clie.db",sql)
+    Resultado = Realiza_consulta(mi_vars.DB_CLIENTES,sql)
     aux = 0
     for res in Resultado:
         aux = res[0] 
     return aux
+
+# Llega un ID y devuelve 3 listas, una con los datos de la tabla "Contacto", "DatosPersonales" y "SusProductos"
+# Nota: El ID debe ser un dato existente
+def Dev_Datos_Cliente(ID):
+    lista1 = []
+    lista2 = []
+    lista3 = []
+    reg = Reg_Un_param_Int(mi_vars.DB_CLIENTES, "Contacto","ID", ID)
+    for i in reg:
+        for n in range(14):
+            lista1.append(i[n])
+    reg = Reg_Un_param_Int(mi_vars.DB_CLIENTES, "DatosPersonales","ID", ID)
+    for i in reg:
+        for n in range(9):
+            lista2.append(i[n])
+    reg = Reg_Un_param_Int(mi_vars.DB_CLIENTES, "SusProductos","ID", ID)
+    for i in reg:
+        for n in range(6):
+            lista3.append(i[n])
+    return lista1, lista2, lista3
 
 # A continuación, se agrega un cliente nuevo con 5 funciones. Desde donde corresponda se llama a la primera que desgloza los datos de una lista y los envía a las funciones
     # encargadas de crear un nuevo registro en cada una de las 4 tablas que tenemos con datos de los clientes.
@@ -177,36 +204,65 @@ def Add_Cliente_Nuevo(Lista):
 def Add_Cliente_Nuevo_DatosPers(Apellido1, Apellido2, Nombre1, Nombre2, Nombre3, Dni, Clasificacion, Comentario):
     sql = "INSERT INTO DatosPersonales VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?)"
     parametros = (Apellido1, Apellido2, Nombre1, Nombre2, Nombre3, Dni, Clasificacion, Comentario)
-    Realiza_consulta("./db\\clie.db", sql, parametros)
+    Realiza_consulta(mi_vars.DB_CLIENTES, sql, parametros)
 # TABLA: FORMAS DE PAGO
 def Add_Cliente_Nuevo_Formas_Pago(Met1, Met2, Met3, Met4, Met5):
     sql = "INSERT INTO FormasDePago VALUES(NULL, ?, ?, ?, ?, ?)"
     parametros = (Met1, Met2, Met3, Met4, Met5)
-    Realiza_consulta("./db\\clie.db", sql, parametros)
+    Realiza_consulta(mi_vars.DB_CLIENTES, sql, parametros)
 # TABLA: SUS PRODUCTOS
 def Add_Cliente_Nuevo_Sus_Prod(Adquirido, EnProceso, Deseos, Fecha, Recordatorios):
     sql = "INSERT INTO SusProductos VALUES(NULL, ?, ?, ?, ?, ?)"
     parametros = (Adquirido, EnProceso, Deseos, Fecha, Recordatorios)
-    Realiza_consulta("./db\\clie.db", sql, parametros)
+    Realiza_consulta(mi_vars.DB_CLIENTES, sql, parametros)
 # TABLA: CONTACTO
 def Add_Cliente_Nuevo_Contacto(Agendado_Cel, TelFijo, Celular, Localidad, Direccion, Facebook, Instagram, email1, email2, Contacto1, Contacto2, Contacto3, Conocimiento):
     sql = "INSERT INTO Contacto VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     parametros = (Agendado_Cel, TelFijo, Celular, Localidad, Direccion, Facebook, Instagram, email1, email2, Contacto1, Contacto2, Contacto3, Conocimiento)
-    Realiza_consulta("./db\\clie.db", sql, parametros)
+    Realiza_consulta(mi_vars.DB_CLIENTES, sql, parametros)
 def Add_Cliente_Nuevo_WspVinculado( Trato, Difusion1, Difusion2, Difusion3, MsjProgramado):
     sql = "INSERT INTO WspVinculado VALUES(NULL, ?, ?, ?, ?, ?)"
     parametros = ( Trato, Difusion1, Difusion2, Difusion3, MsjProgramado)
-    Realiza_consulta("./db\\clie.db", sql, parametros)
+    Realiza_consulta(mi_vars.DB_CLIENTES, sql, parametros)
+
+# Actualiza los datos de un cliente previamente agendado
+# Nota: 2 funciones que trabajan como una, que tuve que diseñar debido a un mal diseño de la función anterior, de crear nuevos clientes con el botón de guardar
+def Act_Cliente(ID, Lista):
+    Lista1 = [Lista[0], Lista[1], Lista[2], Lista[3], Lista[4], Lista[5], Lista[6], Lista[7]]
+    Lista2 = [Lista[8], Lista[9], Lista[10], Lista[11], Lista[12]]
+    Lista3 = [Lista[13], Lista[14], Lista[15], Lista[16], Lista[17]]
+    Lista4 = [Lista[18], Lista[19], Lista[20], Lista[21], Lista[22], Lista[23], Lista[24], Lista[25], Lista[26], Lista[27], Lista[28], Lista[29], Lista[30]]
+    Act_Cliente2(ID, Lista4, Lista1, Lista2, Lista3)
+def Act_Cliente2(ID, Lista_Contacto, Lista_Datos_P, Lista_Forma_P, Lista_Sus_Prod):
+    # Tabla: Datos Personales
+    query = 'UPDATE DatosPersonales SET Apellido1 = ?, Apellido2 = ?, Nombre1 = ?, Nombre2 = ?, Nombre3 = ?, Dni = ?, Clasificacion = ?, Comentario = ? WHERE ID = ?'
+    parameters = (Lista_Datos_P[0], Lista_Datos_P[1], Lista_Datos_P[2], Lista_Datos_P[3], Lista_Datos_P[4], Lista_Datos_P[5], Lista_Datos_P[6], Lista_Datos_P[7], ID)
+    Realiza_consulta(mi_vars.DB_CLIENTES, query, parameters)
+
+    # Tabla: Formas de Pago
+    query = 'UPDATE FormasDePago SET Met1 = ?, Met2 = ?, Met3 = ?, Met4 = ?, Met5 = ? WHERE ID = ?'
+    parameters = (Lista_Forma_P[0], Lista_Forma_P[1], Lista_Forma_P[2], Lista_Forma_P[3], Lista_Forma_P[4], ID)
+    Realiza_consulta(mi_vars.DB_CLIENTES, query, parameters)
+
+    # Tabla: Sus Productos
+    query = 'UPDATE SusProductos SET Adquirido = ?, EnProceso = ?, Deseos = ?, Fecha = ?, Recordatorios = ? WHERE ID = ?'
+    parameters = (Lista_Sus_Prod[0], Lista_Sus_Prod[1], Lista_Sus_Prod[2], Lista_Sus_Prod[3], Lista_Sus_Prod[4], ID)
+    Realiza_consulta(mi_vars.DB_CLIENTES, query, parameters)
+
+    # Tabla: Contacto
+    query = 'UPDATE Contacto SET Agendado_Cel = ?, TelFijo = ?, Celular = ?, Localidad = ?, Direccion = ?, Facebook = ?, Instagram = ?, email1 = ?, email2 = ?, Contacto1 = ?, Contacto2 = ?, Contacto3 = ?, Conocimiento = ? WHERE ID = ?'
+    parameters = ( Lista_Contacto[0], Lista_Contacto[1], Lista_Contacto[2], Lista_Contacto[3], Lista_Contacto[4], Lista_Contacto[5], Lista_Contacto[6], Lista_Contacto[7], Lista_Contacto[8], Lista_Contacto[9], Lista_Contacto[10], Lista_Contacto[11], Lista_Contacto[12], ID)
+    Realiza_consulta(mi_vars.DB_CLIENTES, query, parameters)
 
 # Actualiza los datos de un cliente previamente agendado, se usa en la actualización desde un csv descargado de la cuenta del celular
-def Act_Cliente(ID, Celular, Apellido, Nom1, Nom2, Nom3, Direccion, Comentario):
+def Act_Cliente_csv(ID, Celular, Apellido, Nom1, Nom2, Nom3, Direccion, Comentario):
     query = 'UPDATE Contacto SET Celular = ?, Direccion = ? WHERE ID = ?'
     parameters = ( Celular, Direccion, ID)
-    Realiza_consulta("./db\\clie.db", query, parameters)
+    Realiza_consulta(mi_vars.DB_CLIENTES, query, parameters)
 
     query = 'UPDATE DatosPersonales SET Apellido1 = ?, Nombre1 = ?, Nombre2 = ?, Nombre3 = ?, Comentario = ? WHERE ID = ?'
     parameters = (Apellido, Nom1, Nom2, Nom3, Comentario, ID)
-    Realiza_consulta("./db\\clie.db", query, parameters)
+    Realiza_consulta(mi_vars.DB_CLIENTES, query, parameters)
 
 '''########################################################################################################################################
 ###########################################################################################################################################
@@ -228,6 +284,24 @@ def Reg_Un_param_Int(BaseDeDatos, Tabla, Columna, DatoCoincide):
     sql = "SELECT * FROM {} WHERE {} = {}" .format( Tabla, Columna, DatoCoincide)
     Resultado = Realiza_consulta(BaseDeDatos,sql)
     return Resultado
+
+# DEVUELVE UN REGISTRO PERO LOS DATOS DIRECTAMENTE EN UNA LISTA SEGÚN UN ENTERO
+def Dev_Lista_Registro_Int(BaseDeDatos, Tabla, Columna, DatoCoincide):
+    sql = "SELECT * FROM {} WHERE {} = {}" .format( Tabla, Columna, DatoCoincide)
+    Resultado = Realiza_consulta(BaseDeDatos,sql)
+    lista = []
+    for i in Resultado:
+        for n in range(len(i)):
+            lista.append(i[n])
+    return lista
+
+# DEVUELVE UN DATO PARTICULAR SEGÚN UN ENTERO
+# Nota: El dato debe existir, y el dato de la Col_Devuelve debe ser un valor entero entendiendo que 0 es la primer columna
+def Dev_Dato_Int(BaseDeDatos, Tabla, Col_Compara, DatoCoincide, Col_Devuelve):
+    sql = "SELECT * FROM {} WHERE {} = {}" .format( Tabla, Col_Compara, DatoCoincide)
+    Resultado = Realiza_consulta(BaseDeDatos,sql)
+    for i in Resultado:
+        return i[Col_Devuelve]
 
 '''########################################################################################################################################
 ###########################################################################################################################################
@@ -271,41 +345,68 @@ def Act_Reg_Cant(BaseDeDatos, Cantidad, NomTabla):
     parameters = (Cantidad, NomTabla)
     Realiza_consulta(BaseDeDatos, query, parameters)
 
+# Devuelve en una lista la traducción de los datos de un producto, ya que por ejemplo la línea de un producto en la base de datos figura con un número y no en texto
+def Dev_Producto_String(ID):
+    auxs = ""
+    Reg = Reg_Un_param_Int(mi_vars.BaseDeDatos, "Productos", "ID", ID)
+    Lista = [] 
+    # Será conformada de la sgt manera: Tipo - Linea - Interior - Repuesto - Bazar - AyVta - PedEspeciales - Otros - Tamanio - Litros
+    for pos in Reg:
+        Lista.append(pos[4])
+        Lista.append(pos[3])
+        Lista.append(pos[5])
+        Lista.append(pos[6])
+        Lista.append(pos[7])
+        Lista.append(pos[8])
+        Lista.append(pos[9])
+        Lista.append(pos[10])
+        Lista.append(pos[11])
+        Lista.append(pos[12])
+    # Si es una Pieza le cargamos sus datos, sino lo tratamos como las demás piezas
+    if Lista[0] > 0:
+        auxs = Dev_Dato_Int(mi_vars.BaseDeDatos, "Tipo", "ID", Lista[0], 3)
+        auxs += " " + Dev_Dato_Int(mi_vars.BaseDeDatos, "Linea", "ID", Lista[1], 3)
+        auxs += " " + Dev_Dato_Int(mi_vars.BaseDeDatos, "Interior", "ID", Lista[2], 3)
+        auxs += " " + Lista[8] + "cm"
+        auxs += " " + Lista[9] + "lts"
+    else:
+        for i in range(3,8):
+            if i != "":
+                auxs = Lista[i] + " "
+                if Lista[8] != "":
+                    auxs += Lista[8] + "cm "
+                if Lista[9] != "":
+                    auxs += Lista[9] + "lts"
+                break
+    return auxs
 
 
 
-# BUSCA UN REGISTRO SEGÚN UN CÓDIGO. 
-# DEVUELVE 3 VARIABLES:
+
+# BUSCA UN PRODUCTO SEGÚN UN CÓDIGO. 
+# DEVUELVE 2 VARIABLES:
     # VARIABLE 1:
         # 0 = Cuando no existe el código
         # 1 = Código normal
-        # 2 = Código de paquete, de bulto cerrado
-    # VARIABLE 2: Los datos
-    # VARIABLE 3: Estado del producto (0/1/2 >>> Baja, Alta o Completo)
-def Busca_Cod(BBDD, Tabla, Columna, DatoCoincide):
+    # VARIABLE 2: La posición que indica si está activo
+def Busca_Cod(Codigo):
     
     # Buscamos el dato de la lista de códigos principal
-    Registro = Reg_Un_param(BBDD, Tabla, Columna, DatoCoincide)
+    Registro = Reg_Un_param(mi_vars.BaseDeDatos, "Productos", "Codigo", Codigo)
 
     # He creado primero la lista row con valores de cero(0), porque no puedo capturar la excepción en caso de que haya un error al no
         # encontrar el código en la base de datos. Entonces, la línea: for posicion in Registro: no se ejecuta cuando el valor del Registro es
         # nulo. Al no ejecutarse, row no se actualiza, por ende, deduzco si se encontró o no el Registro.
-    row = [ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+    row = [ '0', '0', '0']
     for posicion in Registro:
-        row = [posicion[0], posicion[1], posicion[2], posicion[3], posicion[4], posicion[5], posicion[6], posicion[7], posicion[8], posicion[9], posicion[10], posicion[11], posicion[12], posicion[13], posicion[14], posicion[15]]
+        row = [posicion[0], posicion[1], posicion[2]]
 
     # Con éste if, determino si se han cargado los datos o no.
     # True: NO SE ENCONTRÓ EL CODIGO EN LA BD. False: Ejecución normal
-    if row[2] == '0':
-        Registro = Reg_Un_param(BBDD, Tabla, 'CodXBulto', DatoCoincide)
-        for posicion in Registro:
-            row = [posicion[0], posicion[1], posicion[2], posicion[3], posicion[4], posicion[5], posicion[6], posicion[7], posicion[8], posicion[9], posicion[10], posicion[11], posicion[12], posicion[13], posicion[14], posicion[15]]
-        if row[2] == '0':
-            return 0, 0, 0
-        else:
-            return 2, row, posicion[1]
+    if row[0] == '0':
+        return 0, False
     else:
-        return 1, row, posicion[1]
+        return 1, row[0]
 
 
 print('Módulo ManejoBBDD.py cargado correctamente.')
@@ -337,3 +438,6 @@ def Realiza_consulta( BaseDeDatos, query, parameters = ()):
 #print(str(Dev_ID_ClienteTexto("ConfigFormaPago", "Nombre", "Visa")))
 
 #print(Dev_ID_ClienteTexto("Contacto","Agendado_Cel","Pg 1093"))
+
+#print(Dev_Lista_Registro_Int(mi_vars.BaseDeDatos, "Productos", "ID", 41))
+#print(Dev_Producto_String(22))

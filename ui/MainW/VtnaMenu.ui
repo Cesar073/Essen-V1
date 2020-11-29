@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1401</width>
-    <height>723</height>
+    <width>1366</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -398,6 +398,17 @@ font: 87 14pt &quot;Arial Black&quot;;</string>
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>push_Producto</tabstop>
+  <tabstop>push_Ofertas</tabstop>
+  <tabstop>push_Pedidos</tabstop>
+  <tabstop>push_Ventas</tabstop>
+  <tabstop>push_Clientes</tabstop>
+  <tabstop>push_Stock</tabstop>
+  <tabstop>push_Recordatorio</tabstop>
+  <tabstop>push_Estado</tabstop>
+  <tabstop>push_Configuracion</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

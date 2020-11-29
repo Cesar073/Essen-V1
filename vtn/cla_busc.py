@@ -17,7 +17,7 @@ GENERALES
     luego serán ordenadas por su cantidad de elementos. Al final se enviarán las líneas desactivadas.
 '''
 
-from PySide2.QtWidgets import QDialog
+from PySide2.QtWidgets import QDialog, QMainWindow
 from PySide2 import QtCore, QtGui, QtWidgets
 from os import walk
 from PySide2.QtGui import QPixmap, QIcon
@@ -41,13 +41,14 @@ import mod.mdb as mdb
 LISTABUSCAR = []
 LISTABPOS = []
 
-class V_Buscar(QDialog):
-    def __init__(self, Ventana_Prod, Ventana_Promo):
+class V_Buscar(QMainWindow):
+    def __init__(self, Ventana_Prod, Ventana_Promo, Ventana_ClienteNuevo):
         super(V_Buscar, self).__init__()
         self.ui = Ui_BuscarProducto()
         self.ui.setupUi(self)
         self.Prod = Ventana_Prod
         self.Prom = Ventana_Promo
+        self.CliN = Ventana_ClienteNuevo
 
         # BOTONES
         # Interacción
@@ -148,7 +149,7 @@ class V_Buscar(QDialog):
         if mi_vars.ORIGEN_BUSCAR == 4:
             # Le indicamos a la ventana que se está por abrir, que acaba de volver desde la ventana "Buscar"
             mi_vars.ORIGEN_BUSCAR = 1
-            self.Vent_ClieNu.show()
+            self.CliN.show()
 
     # Actualizamos las imagenes que hay en la 2da cinta de botones, donde están las líneas de las piezas.
         # Esto es así, porque las líneas puede sufrir modificaciones en el orden que tienen, porque por ejemplo, primero se colocan las líneas

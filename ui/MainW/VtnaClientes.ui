@@ -163,7 +163,7 @@
      </size>
     </property>
    </widget>
-   <widget class="QTextBrowser" name="text_Interes">
+   <widget class="QTextBrowser" name="text_Deseos">
     <property name="geometry">
      <rect>
       <x>600</x>
@@ -185,10 +185,10 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:12pt;&quot;&gt;cacerola cuadrada marsala de 24 - (ANT)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QTextBrowser" name="text_Encargado">
+   <widget class="QTextBrowser" name="text_EnProceso">
     <property name="geometry">
      <rect>
       <x>510</x>
@@ -210,7 +210,8 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:12pt;&quot;&gt;cacerola cuadrada marsala de 24 - (AL)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QTextBrowser" name="text_Comprado">
@@ -235,7 +236,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:12pt;&quot;&gt;cacerola cuadrada marsala de 24 - (ANT)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QPushButton" name="push_Ficha">
@@ -382,7 +383,7 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string/>
     </property>
-    <widget class="QLineEdit" name="line_Direccion">
+    <widget class="QLineEdit" name="line_Contacto">
      <property name="geometry">
       <rect>
        <x>180</x>
@@ -419,10 +420,10 @@ p, li { white-space: pre-wrap; }
       </font>
      </property>
      <property name="text">
-      <string>TELÉFONO</string>
+      <string>CELULAR</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_Telefono">
+    <widget class="QLineEdit" name="line_Insta">
      <property name="geometry">
       <rect>
        <x>180</x>
@@ -462,7 +463,7 @@ p, li { white-space: pre-wrap; }
       <string>APE. Y NOMBRE</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_Dni">
+    <widget class="QLineEdit" name="line_Facebook">
      <property name="geometry">
       <rect>
        <x>180</x>
@@ -481,7 +482,7 @@ p, li { white-space: pre-wrap; }
       </font>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_Apellido">
+    <widget class="QLineEdit" name="line_Celular">
      <property name="geometry">
       <rect>
        <x>180</x>
@@ -500,7 +501,7 @@ p, li { white-space: pre-wrap; }
       </font>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_Nombre">
+    <widget class="QLineEdit" name="line_Ape_Nomb">
      <property name="geometry">
       <rect>
        <x>180</x>
@@ -582,7 +583,7 @@ p, li { white-space: pre-wrap; }
       <string>CONTACTO</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_Contac1">
+    <widget class="QLineEdit" name="line_Conexion">
      <property name="geometry">
       <rect>
        <x>180</x>
@@ -660,8 +661,8 @@ p, li { white-space: pre-wrap; }
    <zorder>label_8</zorder>
    <zorder>label_9</zorder>
    <zorder>push_Menu</zorder>
-   <zorder>text_Interes</zorder>
-   <zorder>text_Encargado</zorder>
+   <zorder>text_Deseos</zorder>
+   <zorder>text_EnProceso</zorder>
    <zorder>text_Comprado</zorder>
    <zorder>push_Ficha</zorder>
    <zorder>push_Buscar</zorder>
@@ -673,20 +674,21 @@ p, li { white-space: pre-wrap; }
   </widget>
  </widget>
  <tabstops>
-  <tabstop>line_Nombre</tabstop>
-  <tabstop>line_Apellido</tabstop>
-  <tabstop>line_Dni</tabstop>
-  <tabstop>line_Telefono</tabstop>
-  <tabstop>line_Direccion</tabstop>
-  <tabstop>line_Contac1</tabstop>
-  <tabstop>text_Comprado</tabstop>
-  <tabstop>text_Encargado</tabstop>
-  <tabstop>text_Interes</tabstop>
+  <tabstop>line_Ape_Nomb</tabstop>
+  <tabstop>line_Celular</tabstop>
+  <tabstop>line_Facebook</tabstop>
+  <tabstop>line_Insta</tabstop>
+  <tabstop>line_Contacto</tabstop>
+  <tabstop>line_Conexion</tabstop>
+  <tabstop>push_Buscar</tabstop>
   <tabstop>push_Nuevo</tabstop>
   <tabstop>push_Ficha</tabstop>
+  <tabstop>push_Importar_Contactos</tabstop>
   <tabstop>push_Limpiar</tabstop>
-  <tabstop>push_Buscar</tabstop>
   <tabstop>push_Menu</tabstop>
+  <tabstop>text_EnProceso</tabstop>
+  <tabstop>text_Comprado</tabstop>
+  <tabstop>text_Deseos</tabstop>
  </tabstops>
  <resources/>
  <connections/>

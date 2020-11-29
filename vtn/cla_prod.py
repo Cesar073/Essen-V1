@@ -165,9 +165,7 @@ class V_Productos(QMainWindow):
         else:
             if event != "":
                 event.ignore()
-                g
             self.hide()
-            #self.Ant.show()
             return 0
 
 
@@ -378,20 +376,21 @@ class V_Productos(QMainWindow):
             if Ruta != "":
                 
                 # Le consultamos al usuario si desea que los valores se actualicen automáticamente o si quiere revisar uno por uno
-                Respuesta = QMessageBox.question(self, "Actualizar los datos del Excel", "Se está por ejecutar la ACTUALIZACIÓN de la base de datos con el EXCEL.  ¿Desea que el programa actualice todo automáticamente?. \n\n Nota: Sólo se actualizarán los productos que tengan alguna diferencia y el programa se detendrá cuando encuentre un producto nuevo.", QMessageBox.Yes | QMessageBox.No)
+                Respuesta = QMessageBox.question(self, "Actualizar los datos del Excel", "Se está por ejecutar la ACTUALIZACIÓN de la base de datos con el EXCEL.  ¿Desea que el programa actualice todo automáticamente?. \n\n Nota: Sólo se actualizarán los productos que tengan alguna diferencia en sus datos y el programa se detendrá cuando encuentre un producto nuevo.", QMessageBox.Yes | QMessageBox.No)
 
                 # Le avisamos al usuario q aquellos artículos que no estén en el nuevo mes, serán actualizados sus precios de todas formas en función al porcentaje que indique
-                texto, ok = QInputDialog.getInt(self, "Ingrese aumento", "A continuación debe indicar el aumento general que han sufrido los productos de Essen. \nEste aumento será aplicado a el resto de productos que no figuran en el archivo de Excel,\n y ésto es porque Essen no publica los precios de artículos de BAZAR o AYUDAVENTAS cuando no los tiene disponible durante el mes, pero uno debe actualizarlos \nigual porque podemos tener dichos artículos en stock y su precio debe ajustarse a todo el catálogo. \n Por ejemplo si queremos que los artículos ajusten su precio a un %10 de aumento entonces debemos colocar simplemente 10. No acepta números decimales")
-                if ok and fts.Es_Numero_Int(texto) == True:
-                    self.Porc_Aumento = int(texto)
+                correcto = False
+                while correcto == False:
+                    texto, ok = QInputDialog.getInt(self, "Ingrese aumento", "A continuación debe indicar el aumento general que han sufrido los productos de Essen. \nEste aumento será aplicado a el resto de productos que no figuran en el archivo de Excel,\n y ésto es porque Essen no publica los precios de artículos de BAZAR o AYUDAVENTAS cuando no los tiene disponible durante el mes, pero uno debe actualizarlos \nigual porque podemos tener dichos artículos en stock y su precio debe ajustarse a todo el catálogo. \n Por ejemplo si queremos que los artículos ajusten su precio a un %10 de aumento entonces debemos colocar simplemente 10. No acepta números decimales")
+                    if ok and fts.Es_Numero_Int(texto) == True:
+                        self.Porc_Aumento = int(texto)
+                        correcto = True
                 
                 # Preparamos la información
                 mi_vars.Lineas, mi_vars.Codigos, mi_vars.Descripcion, mi_vars.Pspv, mi_vars.Precio, mi_vars.Puntos, mi_vars.PuntosMG, mi_vars.Filas = exl.Dev_Listas(Ruta, "Sheet1", 'H')
 
                 # Recorremos los códigos de la base de datos y los comparamos con los del excel y si algún producto no se encuentra en la lista de excel le cargamos su código 
-                    # en una lista auxiliar (LISTAAUXILIAR) para luego poder actualizar su valor y pasarlos a "Desactivados". Durante el bucle no podemos actualizar los 
-                    # valores de los productos a -> Desactivados, porque genera error de Base # de datos bloqueada, ya que durante todo el bucle for la misma se encuentra 
-                    # abierta, por ende se hace luego.
+                    # en una lista auxiliar (LISTAAUXILIAR) para luego poder actualizar su valor.
                 Tabla = mdb.Dev_Tabla(mi_vars.BaseDeDatos, 'Productos')
                 LISTAAUXILIAR = []
                 for reg in Tabla:
@@ -424,7 +423,7 @@ class V_Productos(QMainWindow):
                 # Creamos un string que va a ser el mensaje para mostrar al usuario
                 Largo = len(LISTAAUXILIAR2)
                 if Largo > 0:
-                    MensajeAmostrar = 'Se DESACTIVARÁN los siguientes productos porque no se encuentran disponibles en el ciclo vigente: \n \n'
+                    MensajeAmostrar = 'Se DESACTIVARÁN los siguientes productos porque no se encuentran disponibles en el archivo de EXCEL: \n \n'
                     for pos in LISTAAUXILIAR2:
                         DatosAux = self.R_T_Retorna_Datos_De_BBDD(Codigo=pos)
                         DatosAux[1] = 0
@@ -453,11 +452,56 @@ class V_Productos(QMainWindow):
                 self.MuestraMsjOK("No se ha podido cargar la RUTA del archivo especificado. Error desconocido [1556]", "Error al intentar cargar Ruta")
 
     # Presionando clic en el checkbox de activación
+    # Se controla si al activar un producto, tenemos algún cliente que lo estaba esperando
     def Clic_Activo(self):
-        if self.ui.checkBox_Activo.isChecked() == True:
-            self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Nor, self.G_Nor, self.B_Nor))
-        else:
-            self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Des, self.G_Des, self.B_Des))
+        # Lista que se guardarían los ID de los clientes que están esperando el producto que se va a activar
+        Lista_Clientes_ID = []
+
+        # codigo del producto
+        texto = self.ui.line_Codigo.text()
+        
+        # Controlamos que haya un código escrito en el line
+        if texto != "":
+        
+            # True: Cuando se activa el Checkbox. False: Se desactiva el Checkbox
+            if self.ui.checkBox_Activo.isChecked() == True:
+
+                # Le damos el color de Activado
+                self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Nor, self.G_Nor, self.B_Nor))
+                
+                # Controlamos si existe el pruducto, y de ser así traemos su ID
+                existe, Id_ = mdb.Busca_Cod(texto)
+
+                # True: Cuando el producto existe. False: Producto nuevo
+                if existe == 1:
+
+                    # Buscamos en la lista de deseos de los clientes a ver si alguno estaba esperando para comprarlo y agendamos el ID del cliente en la Lista_Clientes_ID
+                    Tabla = mdb.Dev_Tabla_Clie("SusProductos")
+                    for reg in Tabla:
+                        if reg[3] != "":
+                            aux = ""
+                            for c in reg[3]:
+                                if c == "-":
+                                    if int(aux) == Id_:
+                                        Lista_Clientes_ID.append(reg[0])
+                                    aux = ""
+                                else:
+                                    aux += c
+                    
+                    # Si habían clientes esperando dicho producto, por el momento sólo los mostramos en pantalla mediante un msj
+                    largo = len(Lista_Clientes_ID)
+                    if largo > 0:
+                        mensaje = "Los siguientes clientes (según fueron agendados en el celular), están esperando la activación del producto en cuestión: \n \n"
+                        cont = 0
+                        for i in Lista_Clientes_ID:
+                            cont += 1
+                            nombre = mdb.Dev_Dato_Int(mi_vars.DB_CLIENTES, "Contacto", "ID", i, 1)
+                            if nombre == "":
+                                nombre = "No se posee celular del cliente, ID del cliente: " + str(mdb.Dev_Dato_Int(mi_vars.DB_CLIENTES, "Contacto", "ID", i, 0))
+                            mensaje += str(cont) + "). " + nombre + "\n"
+                        QMessageBox.question(self, "Clientes - Lista Deseos", mensaje, QMessageBox.Ok)
+            else:
+                self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{})".format(self.R_Des, self.G_Des, self.B_Des))
 
     # Este evento se ejecuta cada vez que se presiona una tecla ya sea tanto en la pantalla como en los line_edit especificados. La dificultad de estos casos es mostrar un 
     # número decimal correcto teniendo en cuenta qué es lo que digita el usuario, por ello capturamos lo que digita en una variable, y luego traducimos ésto al LineEdit
@@ -597,7 +641,7 @@ class V_Productos(QMainWindow):
                     
                     # Comparamos los datos actuales con los existentes, y editamos los existentes
                     # Si hay diferencias se activa la variable Diferencia
-                    
+                    '''
                     # Activo
                     Datos = self.R_T_Retorna_Datos_De_BBDD(Codigo=Codigo)
                     if Datos[1] == 0:
@@ -608,6 +652,7 @@ class V_Productos(QMainWindow):
                             self.AUTOM_ACT += 1
                         else:
                             self.ui.groupBox.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
+                    '''
                     # Precio de Costo y Costo10
                     mi_vars.Precio[mi_vars.CONTADOR_] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Precio[mi_vars.CONTADOR_])))
                     if Datos[13] != mi_vars.Precio[mi_vars.CONTADOR_]:

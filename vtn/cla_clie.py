@@ -12,6 +12,7 @@ from vtn.cla_clie_nue import V_ClienteNuevo
 import mod.excel as ex
 import mod.mdb as mdb
 import mod.form as form
+import mod.vars as mi_vars
 
 class V_Clientes(QMainWindow):
     def __init__(self):
@@ -19,17 +20,16 @@ class V_Clientes(QMainWindow):
         self.ui = Ui_Cliente_BD()
         self.ui.setupUi(self)
 
-        #self.ui.push_Menu.clicked.connect(self.Btn_Clic_Volver)
-        self.ui.push_Nuevo.clicked.connect(self.Btn_Clic_Nuevo)
-        self.ui.push_Importar_Contactos.clicked.connect(self.Importar_Contactos)
+        self.CLIENTE_BUSCADO = 0
 
-    def Btn_Clic_Nuevo(self):
-        self.hide()
-        try:
-            self.ui.Ventana_Nuevo_Cliente.show()
-        except:
-            self.ui.Ventana_Nuevo_Cliente = V_ClienteNuevo(self)
-            self.ui.Ventana_Nuevo_Cliente.show()
+        self.ui.push_Ficha.setEnabled(False)
+
+        # BOTONES
+        self.ui.push_Buscar.clicked.connect(self.Buscar_Clientes)
+        # push_Nuevo es manejado desde App.py
+        # push_Ficha es manejado desde App.py
+        self.ui.push_Importar_Contactos.clicked.connect(self.Importar_Contactos)
+        self.ui.push_Limpiar.clicked.connect(self.Limpiar)
     
     def Contador_Frecuencia(self, valor, lista):
         cont = 0
@@ -352,7 +352,7 @@ class V_Clientes(QMainWindow):
 
                         # Una vez que tenemos los valores ajustados, procedemos a actualizar los datos
                         if actualiza == True:
-                            mdb.Act_Cliente(i[0], Celular, Apellido, Nom1, Nom2, Nom3, Direccion, Comentario)
+                            mdb.Act_Cliente_csv(i[0], Celular, Apellido, Nom1, Nom2, Nom3, Direccion, Comentario)
                             Actualizados += 1
 
                     else:
@@ -413,3 +413,260 @@ class V_Clientes(QMainWindow):
 
             else:
                 self.MuestraMsjOK("No se ha podido cargar la RUTA del archivo especificado. Error desconocido [1557]", "Error al intentar cargar Ruta")
+
+    # Menú rápido para buscar clientes y cargarlos en ventana o en la ficha
+    def Buscar_Clientes(self):
+
+        # Extendemos un simple menú para que elija la manera de buscar clientes
+        num, ok = QInputDialog.getInt(self, "Buscar Cliente", "Seleccione el parámetro para buscar clientes:\n0: Cancelar\n1: Manera en que fue agendado\n2: Apellido\n3:Primer nombre\n4: Cualquier nombre que coincida\n5: Número de Celular (No es necesario colocar correctamente el signo + o los espacios.", 0, 0, 5, 1) # QMessageBox.Ok | QMessageBox.Cancel)
+        
+        # True: Seleccionó una búsqueda correcta, de lo contrario se cancela la búsqueda automáticamente
+        if ok == True and num > 0 and num < 6:
+            Consulta = ""
+            if num == 1:
+                Consulta = "Ingrese el nombre o manera en que fue AGENDADO:"
+            elif num == 2:
+                Consulta = "Ingrese APELLIDO:"
+            elif num == 3:
+                Consulta = "Ingrese el PRIMER NOMBRE:"
+            elif num == 4:
+                Consulta = "Ingrese un NOMBRE:"
+            elif num == 5:
+                Consulta = "Ingrese un NÚMERO DE CELULAR:\nNota: No es necesario colocar el signo + o los espacios en blanco."
+
+            valor, ok = QInputDialog.getText(self, "Buscar", Consulta)
+
+            if ok == True and valor != "":
+                Lista_ID_Res = []
+                Lista_Nom_Re = []
+                aux = form.Normalize(valor)
+                # AGENDADO
+                if num == 1:
+                    # Primero buscamos coincidencia exacta
+                    Tabla = mdb.Dev_Tabla_Clie("Contacto")
+                    for reg in Tabla:
+                        if aux == form.Normalize(reg[1]):
+                            agend = reg[1]
+                            Lista_ID_Res.append(reg[0])
+                            lista = mdb.Dev_Lista_Registro_Int(mi_vars.DB_CLIENTES, "DatosPersonales", "ID", Lista_ID_Res[-1])
+                            Lista_Nom_Re.append(agend + " /// " + lista[1] + " " + lista[2] + ", " + lista[3] + " " + lista[4] + " " + lista[5])
+                    # Ahora cargamos todos los que comiencen con la misma frase
+                    largo = len(aux)
+                    Tabla = mdb.Dev_Tabla_Clie("Contacto")
+                    for reg in Tabla:
+                        if aux == form.Normalize(reg[1][0:largo]):
+                            agend = reg[1]
+                            if reg[0] in Lista_ID_Res:
+                                pass
+                            else:
+                                Lista_ID_Res.append(reg[0])
+                                lista = mdb.Dev_Lista_Registro_Int(mi_vars.DB_CLIENTES, "DatosPersonales", "ID", Lista_ID_Res[-1])
+                                Lista_Nom_Re.append(agend + " /// " + lista[1] + " " + lista[2] + ", " + lista[3] + " " + lista[4] + " " + lista[5])
+                # APELLIDO
+                elif num == 2:
+                    # Primero buscamos coincidencia exacta
+                    Tabla = mdb.Dev_Tabla_Clie("DatosPersonales")
+                    for reg in Tabla:
+                        if aux == form.Normalize(reg[1]):
+                            Lista_ID_Res.append(reg[0])
+                            Lista_Nom_Re.append(reg[1] + " " + reg[2] + ", " + reg[3] + " " + reg[4] + " " + reg[5])
+                    # Ahora cargamos todos los que comiencen con la misma frase
+                    largo = len(aux)
+                    Tabla = mdb.Dev_Tabla_Clie("DatosPersonales")
+                    for reg in Tabla:
+                        if aux == form.Normalize(reg[1][0:largo]):
+                            if reg[0] in Lista_ID_Res:
+                                pass
+                            else:
+                                Lista_ID_Res.append(reg[0])
+                                Lista_Nom_Re.append(reg[1] + " " + reg[2] + ", " + reg[3] + " " + reg[4] + " " + reg[5])
+                # PRIMER NOMBRE
+                elif num == 3:
+                    # Primero buscamos coincidencia exacta
+                    Tabla = mdb.Dev_Tabla_Clie("DatosPersonales")
+                    for reg in Tabla:
+                        if aux == form.Normalize(reg[3]):
+                            Lista_ID_Res.append(reg[0])
+                            Lista_Nom_Re.append(reg[3] + " /// " + reg[1] + " " + reg[2] + ", " + reg[3] + " " + reg[4] + " " + reg[5])
+                    # Ahora cargamos todos los que comiencen con la misma frase
+                    largo = len(aux)
+                    Tabla = mdb.Dev_Tabla_Clie("DatosPersonales")
+                    for reg in Tabla:
+                        if aux == form.Normalize(reg[3][0:largo]):
+                            if reg[0] in Lista_ID_Res:
+                                pass
+                            else:
+                                Lista_ID_Res.append(reg[0])
+                                Lista_Nom_Re.append(reg[3] + " /// " + reg[1] + " " + reg[2] + ", " + reg[3] + " " + reg[4] + " " + reg[5])
+                # CUALQUIER NOMBRE
+                elif num == 4:
+                    Consulta = "Ingrese un NOMBRE"
+                # NUM CELULAR
+                elif num == 5:
+                    Consulta = "Ingr"
+
+                Id_seleccionado = 0
+                largo = len(Lista_ID_Res)
+
+                # Si no se encontraron contactos se da aviso
+                if largo == 0:
+                    QMessageBox.question(self, "Aviso", "No se encontraron resultados.", QMessageBox.Ok)
+
+                # Si se encontró uno sólo, se cargan sus datos
+                elif largo == 1:
+                    Id_seleccionado = Lista_ID_Res[0]
+                
+                # Si se encontraron más de un contacto, le damos para que seleccione cuál desea cargar
+                else:
+
+                    # Bucle que se deja de ejecutar sólo cuando se selecciona correctamente un contacto o cuando se cancela la búsqueda
+                    seleccion = False
+                    largo = len(Lista_Nom_Re)
+                    msj_inicio = "Seleccione un contacto de {} resultados encontrados. Se mostrarán un máximo de 10 contactos por página.\n0: Para cancelar la búsqueda\n+ o Enter: Para buscar en la siguiente página\n-: Para buscar en la página anterior\nCon algún número ENTERO que figure en la lista mostrada, lo selecciona.\n\n".format(str(largo))
+                    mensaje = ""
+                    error = ""
+                    cont_pag = 1
+                    while seleccion == False:
+                        aux = ""
+                        for i in range(10):
+                            if cont_pag - 1 + i == largo: break
+                            aux += str(cont_pag + i) + ") {}\n".format(Lista_Nom_Re[cont_pag - 1 + i])
+                        mensaje = error + msj_inicio + aux
+                        error = ""
+                        texto, ok = QInputDialog.getText(self, "Seleccione contacto", mensaje)
+                        if ok == True:
+                            if texto == "0":
+                                seleccion = True
+                            elif texto == "+" or texto == "":
+                                if largo > 10:
+                                    if cont_pag + 10 > largo:
+                                        cont_pag = 1
+                                    else:
+                                        cont_pag += 10
+                            elif texto == "-":
+                                if largo > 10:
+                                    if (cont_pag - 10) > 0:
+                                        cont_pag = int(cont_pag - 10)
+                                    else:
+                                        if (cont_pag - 10) > (-9):
+                                            cont_pag = 1
+                                        else:
+                                            cont_pag = largo - 9
+                            else:
+                                if form.Es_Numero_Int(texto) == True:
+                                    valor = int(texto)
+                                    if valor > 0 and valor <= largo:
+                                        Id_seleccionado = Lista_ID_Res[valor - 1]
+                                        seleccion = True
+                                    else:
+                                        error = "ERROR AL SELECCIONAR ÍNDICE DE CONTACTO, SELECCIONE DE NUEVO\n"
+                                else:
+                                    error = "NO HA SELECCIONADO UNA OPCIÓN VÁLIDA, O NO HA CARGADO UN NÚMERO ENTERO DE MANERA CORRECTA\n"
+                        else:
+                            seleccion = True
+                
+                if Id_seleccionado > 0:
+                    self.Carga_Cliente(Id_seleccionado)
+
+    def Carga_Cliente(self, ID):
+        Contacto, Personales, SusProductos = mdb.Dev_Datos_Cliente(ID)
+
+        # Agendamos en la variable local, el ID del cliente buscado
+        self.CLIENTE_BUSCADO = ID
+        self.ui.push_Ficha.setEnabled(True)
+
+        # Rellenamos los Line_Edit
+        aux = Personales[1]
+        if Personales[2] != "":
+            aux = aux + " " + Personales[2]
+        aux = aux + ", " + Personales[3] + " " + Personales[4] + " " + Personales[5]
+        self.ui.line_Ape_Nomb.setText(aux)
+        self.ui.line_Celular.setText(Contacto[3])
+        self.ui.line_Facebook.setText(Contacto[6])
+        self.ui.line_Insta.setText(Contacto[7])
+        self.ui.line_Contacto.setText(Contacto[10])
+        reg = mdb.Dev_Reg_Segun_Tabla("ConfigConocimiento", "ID", Contacto[13])
+        for i in reg:
+            self.ui.line_Conexion.setText(i[2])
+        
+        # Rellenamos los textos que enlistan los productos de clientes
+        auxm = ""
+        auxs = ""
+        # COMPRADO
+        for caracter in SusProductos[1]:
+            if caracter == "-":
+                listaaux = mdb.Dev_Lista_Registro_Int(mi_vars.BaseDeDatos, "Productos", "ID", int(auxs))
+                if listaaux[3] > 0:
+                    linea = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Linea", "ID", listaaux[3], 3) + " "
+                    tipo = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Tipo", "ID", listaaux[4], 3) + " "
+                    interior = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Interior", "ID", listaaux[5], 3) + "\n"
+                    auxm = auxm + linea + tipo + interior
+                else:
+                    for i in range(6,11):
+                        if listaaux[i] != "":
+                            auxm += listaaux[6] + "\n"
+                            break
+        self.ui.text_Comprado.setPlainText(auxm)
+
+        # EN PROCESO
+        for caracter in SusProductos[2]:
+            if caracter == "-":
+                listaaux = mdb.Dev_Lista_Registro_Int(mi_vars.BaseDeDatos, "Productos", "ID", int(auxs))
+                if listaaux[3] > 0:
+                    linea = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Linea", "ID", listaaux[3], 3) + " "
+                    tipo = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Tipo", "ID", listaaux[4], 3) + " "
+                    interior = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Interior", "ID", listaaux[5], 3) + "\n"
+                    auxm = auxm + linea + tipo + interior
+                else:
+                    for i in range(6,11):
+                        if listaaux[i] != "":
+                            auxm += listaaux[6] + "\n"
+                            break
+        self.ui.text_EnProceso.setPlainText(auxm)
+
+        # DESEOS
+        for caracter in SusProductos[3]:
+            if caracter == "-":
+                listaaux = mdb.Dev_Lista_Registro_Int(mi_vars.BaseDeDatos, "Productos", "ID", int(auxs))
+                if listaaux[3] > 0:
+                    linea = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Linea", "ID", listaaux[3], 3) + " "
+                    tipo = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Tipo", "ID", listaaux[4], 3) + " "
+                    interior = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Interior", "ID", listaaux[5], 3) + " "
+                    tamanio = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Productos", "ID", int(auxs), 11) + "cm "
+                    litros = mdb.Dev_Dato_Int(mi_vars.BaseDeDatos, "Productos", "ID", int(auxs), 12) + "lts \n"
+                    auxm = auxm + tipo + linea + interior + tamanio + litros
+                else:
+                    for i in range(6,13):
+                        if listaaux[i] != "":
+                            auxm += listaaux[i]
+                            if listaaux[11] != "":
+                                auxm += " " + listaaux[11] + "cm "
+                            if listaaux[12] != "":
+                                auxm += " " + listaaux[12] + "lts "
+                            auxm += "\n"
+                            auxs = ""
+                            break
+                auxs = ""
+            else:
+                auxs += caracter
+        self.ui.text_Deseos.setPlainText(auxm)
+
+    # Borra toda la info
+    def Limpiar(self):
+        self.CLIENTE_BUSCADO = 0
+        self.ui.line_Ape_Nomb.clear()
+        self.ui.line_Celular.clear()
+        self.ui.line_Facebook.clear()
+        self.ui.line_Insta.clear()
+        self.ui.line_Contacto.clear()
+        self.ui.line_Conexion.clear()
+        self.ui.text_Deseos.clear()
+        self.ui.text_Comprado.clear()
+        self.ui.text_EnProceso.clear()
+        self.ui.line_Ape_Nomb.setFocus()
+
+
+
+
+
+

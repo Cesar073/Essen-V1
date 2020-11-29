@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>ClienteNuevo</class>
+ <widget class="QMainWindow" name="ClienteNuevo">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -37,7 +37,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normalon>../Dialog/icon/anterior.png</normalon>
+      <normalon>../../icon/anterior.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -73,7 +73,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normalon>../Dialog/icon/cancelar2.png</normalon>
+      <normalon>../../icon/cancelar2.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -479,7 +479,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normalon>../Dialog/icon/limpiararchivo2.png</normalon>
+      <normalon>../../icon/limpiararchivo2.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -515,7 +515,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normalon>../Dialog/icon/check.png</normalon>
+      <normalon>../../icon/check.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -1142,7 +1142,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normalon>../Dialog/icon/guardararchivo.png</normalon>
+      <normalon>../../icon/guardararchivo.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -1178,7 +1178,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normalon>../Dialog/icon/check.png</normalon>
+      <normalon>../../icon/recordatorio.png</normalon>
      </iconset>
     </property>
     <property name="iconSize">
@@ -1439,6 +1439,41 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>line_0</tabstop>
+  <tabstop>line_1</tabstop>
+  <tabstop>line_2</tabstop>
+  <tabstop>line_3</tabstop>
+  <tabstop>line_4</tabstop>
+  <tabstop>line_5</tabstop>
+  <tabstop>line_6</tabstop>
+  <tabstop>textEdit</tabstop>
+  <tabstop>push_Limpiar</tabstop>
+  <tabstop>line_7</tabstop>
+  <tabstop>line_8</tabstop>
+  <tabstop>line_9</tabstop>
+  <tabstop>line_10</tabstop>
+  <tabstop>line_11</tabstop>
+  <tabstop>line_12</tabstop>
+  <tabstop>line_13</tabstop>
+  <tabstop>line_14</tabstop>
+  <tabstop>line_15</tabstop>
+  <tabstop>line_16</tabstop>
+  <tabstop>line_17</tabstop>
+  <tabstop>line_18</tabstop>
+  <tabstop>combo_Conocimiento</tabstop>
+  <tabstop>combo_MetP1</tabstop>
+  <tabstop>combo_MetP2</tabstop>
+  <tabstop>combo_MetP3</tabstop>
+  <tabstop>combo_MetP4</tabstop>
+  <tabstop>combo_MetP5</tabstop>
+  <tabstop>push_Agrega_Deseo</tabstop>
+  <tabstop>push_Agrega_Record</tabstop>
+  <tabstop>list_Deseos</tabstop>
+  <tabstop>push_Elimina_Item</tabstop>
+  <tabstop>push_Guardar</tabstop>
+  <tabstop>push_Anterior</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
