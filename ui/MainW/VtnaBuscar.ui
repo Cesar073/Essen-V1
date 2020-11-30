@@ -20,7 +20,8 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>icon/buscarlupa.png</normaloff>icon/buscarlupa.png</iconset>
+    <normalon>../../Logo.ico</normalon>
+   </iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="push_op1">

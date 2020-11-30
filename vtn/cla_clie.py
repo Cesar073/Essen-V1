@@ -15,10 +15,11 @@ import mod.form as form
 import mod.vars as mi_vars
 
 class V_Clientes(QMainWindow):
-    def __init__(self):
+    def __init__(self, ventanaAnterior):
         super(V_Clientes, self).__init__()
         self.ui = Ui_Cliente_BD()
         self.ui.setupUi(self)
+        self.Ant = ventanaAnterior
 
         self.CLIENTE_BUSCADO = 0
 
@@ -31,6 +32,11 @@ class V_Clientes(QMainWindow):
         self.ui.push_Importar_Contactos.clicked.connect(self.Importar_Contactos)
         self.ui.push_Limpiar.clicked.connect(self.Limpiar)
     
+    def closeEvent(self, event):
+        event.ignore()
+        self.hide()
+        self.Ant.show()
+
     def Contador_Frecuencia(self, valor, lista):
         cont = 0
         for i in lista:

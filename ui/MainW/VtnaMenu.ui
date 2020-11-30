@@ -15,7 +15,8 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>icon/inicio.png</normaloff>icon/inicio.png</iconset>
+    <normaloff>icon/inicio.png</normaloff>
+    <normalon>../../Logo.ico</normalon>icon/inicio.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="push_Producto">

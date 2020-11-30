@@ -32,10 +32,11 @@ class V_Productos(QMainWindow):
     '''########################################################################################################################################
     ###########################################################################################################################################
                                                     FUNCIONES RELATIVAS A LA VENTANA                                                        '''
-    def __init__(self):
+    def __init__(self, Vnt_Anterior):
         super(V_Productos, self).__init__()
         self.ui = Ui_Productos()
         self.ui.setupUi(self)
+        self.Ant = Vnt_Anterior
 
         # VARIABLES
         # 02 - Total de Productos en la db
@@ -112,7 +113,8 @@ class V_Productos(QMainWindow):
         # CHECKBOX
         self.ui.checkBox_Activo.clicked.connect(self.Clic_Activo)
     
-    def mostrar(self):
+    def mostrar(self, anterior):
+        self.Ant = anterior
         self.show()
 
     def showEvent(self, event):
@@ -157,16 +159,15 @@ class V_Productos(QMainWindow):
                 if event != "":
                     event.ignore()
                 self.hide()
-                return 0
+                self.Ant.show()
             else:
                 if event != "":
                     event.ignore()
-                return 1
         else:
             if event != "":
                 event.ignore()
             self.hide()
-            return 0
+            self.Ant.show()
 
 
     '''########################################################################################################################################

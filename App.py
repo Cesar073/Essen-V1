@@ -78,16 +78,16 @@ class V_Menu(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.Vent_Produc = V_Productos()
+        self.Vent_Produc = V_Productos(self)
         self.Vent_Promos = V_Promos(self)
         #self.Vent_Pedido = V_Pedidos(self)
         self.Vent_Ventas = V_Ventas(self)
-        self.Vent_Client = V_Clientes()
+        self.Vent_Client = V_Clientes(self)
         self.Vent_Stock = V_Stock(self)
         #self.Vent_Record = V_Recordatorio(self)
         #self.Vent_Estado = V_Estado(self)
         self.Vent_Config = V_Configuracion(self)
-        self.Vent_ClieNu = V_ClienteNuevo()
+        self.Vent_ClieNu = V_ClienteNuevo(self.Vent_Client)
         self.Vent_Buscar = V_Buscar(self.Vent_Produc, self.Vent_Promos, self.Vent_ClieNu)
 
         # Botones
@@ -153,6 +153,7 @@ class V_Menu(QMainWindow):
 
     def Abrir_ClieN_Clie(self):
         self.Vent_Client.hide()
+        self.Vent_ClieNu.Cli_buscado = 0
         self.Vent_ClieNu.show()
 
     def Abrir_Clie_ClieN(self):
@@ -166,7 +167,7 @@ class V_Menu(QMainWindow):
 
     def Abrir_Prod(self):
         self.hide()
-        self.Vent_Produc.mostrar()
+        self.Vent_Produc.mostrar(self)
 
     def Abrir_Prom(self):
         self.hide()

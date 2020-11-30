@@ -14,13 +14,14 @@ import mod.form as fm
 
 
 class V_ClienteNuevo(QMainWindow):
-    def __init__(self, Buscado = ""):
+    def __init__(self, Vnt_Anterior, Buscado = ""):
         super(V_ClienteNuevo, self).__init__()
         # Acabo de borrar el "self" de la línea de abajo, para poner éste recordatorio.
             # Necesito adaptar la creación de un nuevo cliente, con la nueva tabla ChatsWsp que tiene la db
         self.ui = Ui_ClienteNuevo()
         self.ui.setupUi(self)
         self.Cli_buscado = 0
+        self.Ant = Vnt_Anterior
 
         self.ui.line_5.textChanged.connect(self.Cambio_Line5)
         self.ui.line_6.textChanged.connect(self.Cambio_Line6)
@@ -155,9 +156,6 @@ class V_ClienteNuevo(QMainWindow):
             self.Carga_Listas()
         else:
             self.Limpia_Ventana()
-
-
-
 
     def showEvent(self, event):
         # Actualizamos los valores de los comboBox

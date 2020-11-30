@@ -3,13 +3,16 @@
 ################################################################################
 ## Form generated from reading UI file 'VtnaMenu.ui'
 ##
-## Created by: Qt User Interface Compiler version 5.15.1
+## Created by: Qt User Interface Compiler version 5.15.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
+from PySide2.QtCore import (QCoreApplication, QDate, QDateTime, QMetaObject,
+    QObject, QPoint, QRect, QSize, QTime, QUrl, Qt)
+from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
+    QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter,
+    QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
 
@@ -17,10 +20,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1366, 700)
+        MainWindow.resize(1401, 723)
         icon = QIcon()
         icon.addFile(u"icon/inicio.png", QSize(), QIcon.Normal, QIcon.Off)
-        icon.addFile(u"../../Logo.ico", QSize(), QIcon.Normal, QIcon.On)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
@@ -140,14 +142,6 @@ class Ui_MainWindow(object):
         self.push_Configuracion.setIcon(icon9)
         self.push_Configuracion.setIconSize(QSize(150, 130))
         MainWindow.setCentralWidget(self.centralwidget)
-        QWidget.setTabOrder(self.push_Producto, self.push_Ofertas)
-        QWidget.setTabOrder(self.push_Ofertas, self.push_Pedidos)
-        QWidget.setTabOrder(self.push_Pedidos, self.push_Ventas)
-        QWidget.setTabOrder(self.push_Ventas, self.push_Clientes)
-        QWidget.setTabOrder(self.push_Clientes, self.push_Stock)
-        QWidget.setTabOrder(self.push_Stock, self.push_Recordatorio)
-        QWidget.setTabOrder(self.push_Recordatorio, self.push_Estado)
-        QWidget.setTabOrder(self.push_Estado, self.push_Configuracion)
 
         self.retranslateUi(MainWindow)
 

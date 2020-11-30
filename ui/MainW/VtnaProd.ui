@@ -15,7 +15,8 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>icon/cocina3.png</normaloff>icon/cocina3.png</iconset>
+    <normaloff>icon/cocina3.png</normaloff>
+    <normalon>../../Logo.ico</normalon>icon/cocina3.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox">
