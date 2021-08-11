@@ -387,8 +387,8 @@ class V_Productos(QMainWindow):
                         self.Porc_Aumento = int(texto)
                         correcto = True
                 
-                # Preparamos la información
-                mi_vars.Lineas, mi_vars.Codigos, mi_vars.Descripcion, mi_vars.Pspv, mi_vars.Precio, mi_vars.Puntos, mi_vars.PuntosMG, mi_vars.Filas = exl.Dev_Listas(Ruta, "Sheet1", 'H')
+                # Preparamos la información y por las dudas controlamos si se pudo o no abrir el archivo
+                mi_vars.Lineas, mi_vars.Codigos, mi_vars.Descripcion, mi_vars.Pspv, mi_vars.Precio, mi_vars.Puntos, mi_vars.PuntosMG, mi_vars.Filas = exl.Dev_Listas(Ruta, "Lista de Precios", 'H')
 
                 # Recorremos los códigos de la base de datos y los comparamos con los del excel y si algún producto no se encuentra en la lista de excel le cargamos su código 
                     # en una lista auxiliar (LISTAAUXILIAR) para luego poder actualizar su valor.
@@ -642,9 +642,10 @@ class V_Productos(QMainWindow):
                     
                     # Comparamos los datos actuales con los existentes, y editamos los existentes
                     # Si hay diferencias se activa la variable Diferencia
-                    '''
+                    
                     # Activo
                     Datos = self.R_T_Retorna_Datos_De_BBDD(Codigo=Codigo)
+                    '''
                     if Datos[1] == 0:
                         Diferencia = True
                         Datos[1] = 1
@@ -667,8 +668,8 @@ class V_Productos(QMainWindow):
                         else:
                             Datos[13] = mi_vars.Precio[mi_vars.CONTADOR_]
                             Datos[14] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Precio[mi_vars.CONTADOR_]*1.1)))
-                            self.ui.line_Pcio_Costo.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
-                            self.ui.line_Costo10.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
+                            self.ui.line_Pcio_Costo.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,self.G_Dif,self.B_Dif))
+                            self.ui.line_Costo10.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,self.G_Dif,self.B_Dif))
                     # PSPV y Pcio Lista
                     if Datos[15] != mi_vars.Pspv[mi_vars.CONTADOR_]:
                         Diferencia = True
@@ -681,8 +682,8 @@ class V_Productos(QMainWindow):
                         else:
                             Datos[15] = float(fts.Redondear(fts.Ajusta_A_2_Dec(mi_vars.Pspv[mi_vars.CONTADOR_])))
                             Datos[16] = float((fts.Redondear((Datos[15] * 1.1) / 12)) * 12)
-                            self.ui.line_PSPV.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
-                            self.ui.line_Pcio_Lista.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
+                            self.ui.line_PSPV.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,self.G_Dif,self.B_Dif))
+                            self.ui.line_Pcio_Lista.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,self.G_Dif,self.B_Dif))
                     # Puntos
                     if Datos[17] != mi_vars.Puntos[mi_vars.CONTADOR_]:
                         Diferencia = True
@@ -693,7 +694,7 @@ class V_Productos(QMainWindow):
                                 self.AUTOM_ACT += 1
                         else:
                             Datos[17] = mi_vars.Puntos[mi_vars.CONTADOR_]
-                            self.ui.line_Puntos.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
+                            self.ui.line_Puntos.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,self.G_Dif,self.B_Dif))
                     # Puntos MG
                     if Datos[18] != mi_vars.PuntosMG[mi_vars.CONTADOR_]:
                         Diferencia = True
@@ -704,7 +705,7 @@ class V_Productos(QMainWindow):
                                 self.AUTOM_ACT += 1
                         else:
                             Datos[18] = mi_vars.PuntosMG[mi_vars.CONTADOR_]
-                            self.ui.line_Puntos_MG.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,G_Dif,B_Dif))
+                            self.ui.line_Puntos_MG.setStyleSheet("background-color: rgb({},{},{});".format(self.R_Dif,self.G_Dif,self.B_Dif))
                     if Diferencia == True:
                         Datos[19] = "[PRODUCTO NRO: " + str(mi_vars.CONTADOR_ + 1) + "   DE: " + str(CantidadProd) + "]"
                     # Actualizamos la fecha, sí o sí, para estar seguros que estamos con los datos actualizados, hayan o no cambiado

@@ -71,10 +71,7 @@ def Dev_Listas(Nom_Libro, Nom_Hoja, ColumnaPrecio):
                     else:
                         Lista6.append(0)
                     # Columna de Puntos MG
-                    if Col_7[Cont].value != None:
-                        Lista7.append(int(Col_7[Cont].value))
-                    else:
-                        Lista7.append(0)
+                    Lista7.append(0)
                     Lista8.append(Cont+1)
             Cont += 1
             #print(Cont)
